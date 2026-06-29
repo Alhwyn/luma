@@ -7,9 +7,11 @@ A TypeScript client for the [Luma public API](https://public-api.luma.com). Not 
 ```ts
 import { Luma } from "luma";
 
-const luma = new Luma(process.env.LUMA_API_KEY!);
+const luma = new Luma("your-api-key");
 
-const user = await luma.users.get();
-const { data: events } = await luma.events.list({ pagination_limit: 20 });
-const guests = await luma.events.guests.list("evt-...");
+await luma.events.guests.add("evt-abc123", {
+  guests: [
+    { email: "jane@example.com", name: "Jane Doe" },
+  ],
+});
 ```
