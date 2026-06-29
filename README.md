@@ -8,14 +8,27 @@ A TypeScript client for the [Luma public API](https://public-api.luma.com). Not 
 
 ## Install
 
-```bash
-bun add luma-api
+Packages are published to [GitHub Packages](https://github.com/Alhwyn/luma/packages).
+
+**1. Authenticate** — create a [GitHub token](https://github.com/settings/tokens) with `read:packages`, then add to `~/.npmrc`:
+
+```
+@alhwyn:registry=https://npm.pkg.github.com
+//npm.pkg.github.com/:_authToken=YOUR_GITHUB_TOKEN
 ```
 
-For the CLI:
+See [`.npmrc.example`](.npmrc.example) for a template.
+
+**2. Install the SDK:**
 
 ```bash
-bun add luma-cli
+bun add @alhwyn/luma
+```
+
+**3. Install the CLI (optional):**
+
+```bash
+bun add @alhwyn/luma-cli
 ```
 
 ## Setup
@@ -30,7 +43,7 @@ cp .env.example .env
 ## Usage
 
 ```ts
-import { Luma } from "luma-api";
+import { Luma } from "@alhwyn/luma";
 
 const luma = new Luma(process.env.LUMA_API_KEY!);
 
@@ -43,7 +56,7 @@ await luma.events.guests.add("evt-abc123", {
 
 ## CLI
 
-After installing `luma-cli`:
+After installing `@alhwyn/luma-cli`:
 
 ```bash
 luma users get
@@ -63,23 +76,33 @@ bun test
 bun run build
 ```
 
-## Publish
+## Publish (maintainers)
 
-Publish to npm in this order:
+Packages publish to GitHub Packages as `@alhwyn/luma` and `@alhwyn/luma-cli`.
 
-1. **`luma-api`** (repo root) — the SDK library
-2. **`luma-cli`** (`cli/`) — depends on `luma-api`
+### Automatic (recommended)
+
+1. Push your changes to `main`
+2. Create a GitHub release with tag `v0.1.0` (or bump version in `package.json` first)
+3. The [Publish workflow](.github/workflows/publish.yml) runs on `release: published` and publishes both packages
+
+### Manual
 
 ```bash
-npm login
+# one-time: token with write:packages in NODE_AUTH_TOKEN
+export NODE_AUTH_TOKEN=ghp_...
 
-# from repo root
+# SDK first
 bun run build:api
-npm publish --access public
+npm publish
 
-# from cli/ — update luma-api dependency to "^0.1.0" in cli/package.json first
-cd cli && bun run build
-npm publish --access public
+# CLI second — point at published SDK, not file:..
+cd cli
+npm pkg set 'dependencies[@alhwyn/luma]=^0.1.0'
+bun run build
+npm publish
 ```
 
 Verify with `npm publish --dry-run` before the first release.
+
+After publish, packages appear under **Packages** on the GitHub repo sidebar.

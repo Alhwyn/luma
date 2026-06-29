@@ -1,0 +1,46 @@
+name: Publish
+
+on:
+  release:
+    types: [published]
+
+permissions:
+  contents: read
+  packages: write
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: latest
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          registry-url: https://npm.pkg.github.com
+          scope: "@alhwyn"
+
+      - run: bun install --frozen-lockfile
+
+      - run: bun run build
+
+      - name: Publish @alhwyn/luma
+        run: npm publish
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Point CLI at published SDK version
+        run: |
+          VERSION=$(node -p "require('../package.json').version")
+          npm pkg set "dependencies[@alhwyn/luma]=^${VERSION}"
+        working-directory: cli
+
+      - name: Publish @alhwyn/luma-cli
+        run: npm publish
+        working-directory: cli
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}

@@ -11,7 +11,7 @@
 
     // Monorepo: resolve the CLI's runtime dependency to SDK source for editor typechecking
     "paths": {
-      "luma-api": ["./src/index.ts"]
+      "@alhwyn/luma": ["./src/index.ts"]
     },
 
     // Bundler mode
