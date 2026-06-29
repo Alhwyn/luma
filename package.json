@@ -1,12 +1,15 @@
 {
-  "name": "luma-api",
+  "name": "@alhwyn/luma",
   "version": "0.1.0",
   "description": "Unofficial TypeScript SDK for the Luma API",
   "type": "module",
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "https://github.com/Alhwyn/luma.git"
+    "url": "git+https://github.com/Alhwyn/luma.git"
+  },
+  "publishConfig": {
+    "registry": "https://npm.pkg.github.com"
   },
   "keywords": ["luma", "events", "api", "sdk", "typescript"],
   "files": ["dist", "README.md", "LICENSE"],
@@ -31,6 +34,7 @@
     "build": "bun run build:api && bun run build:cli",
     "test": "bun test",
     "prepublishOnly": "bun run build:api",
+    "publish:github": "npm publish",
     "generate:types": "openapi-typescript https://public-api.luma.com/openapi.json -o src/types/generated.d.ts"
   },
   "devDependencies": {

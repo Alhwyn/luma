@@ -4,6 +4,10 @@ on:
   release:
     types: [published]
 
+permissions:
+  contents: read
+  packages: write
+
 jobs:
   publish:
     runs-on: ubuntu-latest
@@ -17,25 +21,26 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 22
-          registry-url: https://registry.npmjs.org
+          registry-url: https://npm.pkg.github.com
+          scope: "@alhwyn"
 
       - run: bun install --frozen-lockfile
 
       - run: bun test
 
-      - name: Publish luma-api
-        run: npm publish --access public
+      - name: Publish @alhwyn/luma
+        run: npm publish
         env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+          NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Point CLI at published SDK version
         run: |
           VERSION=$(node -p "require('../package.json').version")
-          npm pkg set "dependencies[luma-api]=^${VERSION}"
+          npm pkg set "dependencies[@alhwyn/luma]=^${VERSION}"
         working-directory: cli
 
-      - name: Publish luma-cli
-        run: npm publish --access public
+      - name: Publish @alhwyn/luma-cli
+        run: npm publish
         working-directory: cli
         env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+          NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}

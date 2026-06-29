@@ -1,4 +1,4 @@
-import { Luma } from "luma-api";
+import { Luma } from "@alhwyn/luma";
 import { formatEventsList } from "./format-events";
 import { loadEnvFile } from "./load-env";
 import { parseArgs, requireApiKey, usage } from "./parse";
