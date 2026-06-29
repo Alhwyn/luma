@@ -30,7 +30,7 @@
     "build:cli": "bun run --cwd cli build",
     "build": "bun run build:api && bun run build:cli",
     "test": "bun test",
-    "prepublishOnly": "bun test && bun run build:api",
+    "prepublishOnly": "bun run build:api",
     "generate:types": "openapi-typescript https://public-api.luma.com/openapi.json -o src/types/generated.d.ts"
   },
   "devDependencies": {

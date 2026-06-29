@@ -73,12 +73,13 @@ Publish to npm in this order:
 ```bash
 npm login
 
-# from repo root
-bun run build:api
+# from repo root — prepublishOnly builds dist/ automatically
+bun test
 npm publish --access public
 
-# from cli/ — update luma-api dependency to "^0.1.0" in cli/package.json first
-cd cli && bun run build
+# from cli/ — prepublishOnly builds dist/ automatically
+cd cli
+npm pkg set 'dependencies[luma-api]=^0.1.0'
 npm publish --access public
 ```
 
