@@ -3,9 +3,20 @@
   "configVersion": 1,
   "workspaces": {
     "": {
-      "name": "luma",
+      "name": "luma-api",
       "devDependencies": {
         "openapi-typescript": "^7.13.0",
+        "typescript": "^5",
+      },
+    },
+    "cli": {
+      "name": "luma-cli",
+      "version": "0.1.0",
+      "bin": {
+        "luma": "./dist/index.js",
+      },
+      "dependencies": {
+        "luma-api": "file:..",
       },
     },
   },
@@ -49,6 +60,10 @@
     "js-yaml": ["js-yaml@4.2.0", "", { "dependencies": { "argparse": "^2.0.1" }, "bin": { "js-yaml": "bin/js-yaml.js" } }, "sha512-ePWsvanv0DWuDRsW8dnt+R4jQ31SCRCQ7hhNcPXZPsoBZiemuZNYGf7adZdqX2D86j6rvKp3RpCxVTSb8WQlOw=="],
 
     "json-schema-traverse": ["json-schema-traverse@1.0.0", "", {}, "sha512-NM8/P9n3XjXhIZn1lLhkFaACTOURQXjWhV4BA/RnOv8xvgqtqpAX9IO4mRQxSx1Rlo4tqzeqb0sOlruaOy3dug=="],
+
+    "luma-api": ["luma-api@root:", {}],
+
+    "luma-cli": ["luma-cli@workspace:cli"],
 
     "minimatch": ["minimatch@5.1.9", "", { "dependencies": { "brace-expansion": "^2.0.1" } }, "sha512-7o1wEA2RyMP7Iu7GNba9vc0RWWGACJOCZBJX2GJWip0ikV+wcOsgVuY9uE8CPiyQhkGFSlhuSkZPavN7u1c2Fw=="],
 

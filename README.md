@@ -6,10 +6,33 @@ A TypeScript client for the [Luma public API](https://public-api.luma.com). Not 
 
 **Note:** You need a [Luma Plus](https://luma.com) organization to use the API. See the [Getting Started guide](https://docs.luma.com/reference/getting-started-with-your-api) for setup and authentication.
 
-```ts
-import { Luma } from "luma";
+## Install
 
-const luma = new Luma("your-api-key");
+```bash
+bun add luma-api
+```
+
+For the CLI:
+
+```bash
+bun add luma-cli
+```
+
+## Setup
+
+Get an API key from [Luma API keys](https://luma.com/calendar/manage/api-keys) (Luma Plus required).
+
+```bash
+cp .env.example .env
+# add LUMA_API_KEY=your-key-here
+```
+
+## Usage
+
+```ts
+import { Luma } from "luma-api";
+
+const luma = new Luma(process.env.LUMA_API_KEY!);
 
 await luma.events.guests.add("evt-abc123", {
   guests: [
@@ -17,3 +40,46 @@ await luma.events.guests.add("evt-abc123", {
   ],
 });
 ```
+
+## CLI
+
+After installing `luma-cli`:
+
+```bash
+luma whoami
+luma events list
+luma --help
+```
+
+### Local development
+
+From this repo:
+
+```bash
+bun install
+cp .env.example .env   # add your API key
+bun run luma whoami
+bun test
+bun run build
+```
+
+## Publish
+
+Publish to npm in this order:
+
+1. **`luma-api`** (repo root) — the SDK library
+2. **`luma-cli`** (`cli/`) — depends on `luma-api`
+
+```bash
+npm login
+
+# from repo root
+bun run build:api
+npm publish --access public
+
+# from cli/ — update luma-api dependency to "^0.1.0" in cli/package.json first
+cd cli && bun run build
+npm publish --access public
+```
+
+Verify with `npm publish --dry-run` before the first release.

@@ -1,0 +1,26 @@
+{
+  "name": "luma-cli",
+  "version": "0.1.0",
+  "description": "CLI for the unofficial Luma API SDK",
+  "type": "module",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Alhwyn/luma.git",
+    "directory": "cli"
+  },
+  "bin": {
+    "luma": "./dist/index.js"
+  },
+  "files": ["dist"],
+  "dependencies": {
+    "luma-api": "file:.."
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "scripts": {
+    "build": "bun build ./src/index.ts --outdir dist --target node --format esm --packages=external && printf '#!/usr/bin/env node\\n' | cat - dist/index.js > dist/index.tmp && mv dist/index.tmp dist/index.js && chmod +x dist/index.js",
+    "prepublishOnly": "bun run build"
+  }
+}
