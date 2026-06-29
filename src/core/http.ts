@@ -71,6 +71,6 @@ export const request = async <T>(
     headers,
     body: method === "POST" && opts?.body !== undefined ? JSON.stringify(opts.body) : undefined,
   });
-  
+
   return parseResponse<T>(response);
 }

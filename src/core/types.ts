@@ -1,4 +1,5 @@
-export type QueryParams =  Record<string, string | number | boolean | undefined>;
+export type QueryParamValue = string | number | boolean;
+export type QueryParams = Record<string, QueryParamValue | QueryParamValue[] | undefined>;
 
 export type ClientOptions = {
   baseUrl?: string;
