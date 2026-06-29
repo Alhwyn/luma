@@ -9,6 +9,11 @@
     "allowJs": true,
     "types": ["bun"],
 
+    // Monorepo: resolve the CLI's runtime dependency to SDK source for editor typechecking
+    "paths": {
+      "luma-api": ["./src/index.ts"]
+    },
+
     // Bundler mode
     "moduleResolution": "bundler",
     "allowImportingTsExtensions": true,

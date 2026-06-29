@@ -34,6 +34,7 @@
     "generate:types": "openapi-typescript https://public-api.luma.com/openapi.json -o src/types/generated.d.ts"
   },
   "devDependencies": {
+    "@types/node": "^26.0.1",
     "openapi-typescript": "^7.13.0",
     "typescript": "^5"
   }
