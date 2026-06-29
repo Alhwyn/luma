@@ -2,7 +2,7 @@
   "extends": "../tsconfig.json",
   "compilerOptions": {
     "paths": {
-      "luma-api": ["../src/index.ts"]
+      "@alhwyn/luma": ["../src/index.ts"]
     },
     "types": ["node"]
   },
