@@ -16,7 +16,7 @@ jobs:
 
       - uses: oven-sh/setup-bun@v2
         with:
-          bun-version: latest
+          bun-version: 1.3.13
 
       - uses: actions/setup-node@v4
         with:
@@ -26,7 +26,7 @@ jobs:
 
       - run: bun install --frozen-lockfile
 
-      - run: bun run build
+      - run: bun test
 
       - name: Publish @alhwyn/luma
         run: npm publish
