@@ -46,7 +46,7 @@ await luma.events.guests.add("evt-abc123", {
 After installing `luma-cli`:
 
 ```bash
-luma whoami
+luma users get
 luma events list
 luma --help
 ```
@@ -58,7 +58,7 @@ From this repo:
 ```bash
 bun install
 cp .env.example .env   # add your API key
-bun run luma whoami
+bun run luma users get
 bun test
 bun run build
 ```

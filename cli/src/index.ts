@@ -1,4 +1,6 @@
 import { Luma } from "luma-api";
+import { formatEventsList } from "./format-events";
+import { loadEnvFile } from "./load-env";
 import { parseArgs, requireApiKey, usage } from "./parse";
 
 export const run = async (argv: string[]): Promise<number> => {
@@ -10,25 +12,21 @@ export const run = async (argv: string[]): Promise<number> => {
       return 0;
     }
 
+    loadEnvFile();
     const apiKey = requireApiKey(process.env.LUMA_API_KEY);
     const luma = new Luma(apiKey);
 
     switch (command.kind) {
-      case "whoami": {
+      case "users-get": {
         const user = await luma.users.get();
         console.log(`${user.email} (${user.id})`);
         return 0;
       }
-      case "events": {
-        const { data: events } = await luma.events.list();
-        if (events.length === 0) {
-          console.log("No events found.");
-          return 0;
-        }
-
-        for (const event of events) {
-          console.log(`${event.id}\t${event.name}`);
-        }
+      case "events-list": {
+        const { data: events, hasMore } = await luma.events.list({
+          pagination_limit: command.limit,
+        });
+        console.log(formatEventsList(events, { hasMore }));
         return 0;
       }
       default: {
