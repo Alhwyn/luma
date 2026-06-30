@@ -11,8 +11,18 @@
   "publishConfig": {
     "registry": "https://npm.pkg.github.com"
   },
-  "keywords": ["luma", "events", "api", "sdk", "typescript"],
-  "files": ["dist", "README.md", "LICENSE"],
+  "keywords": [
+    "luma",
+    "events",
+    "api",
+    "sdk",
+    "typescript"
+  ],
+  "files": [
+    "dist",
+    "README.md",
+    "LICENSE"
+  ],
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
   "exports": {
@@ -23,7 +33,10 @@
       "default": "./dist/index.js"
     }
   },
-  "workspaces": [".", "cli"],
+  "workspaces": [
+    ".",
+    "cli"
+  ],
   "engines": {
     "node": ">=18"
   },
@@ -42,5 +55,8 @@
     "bun-types": "^1.3.14",
     "openapi-typescript": "^7.13.0",
     "typescript": "^5"
+  },
+  "dependencies": {
+    "@alhwyn/luma": "^0.1.1"
   }
 }
