@@ -1,0 +1,71 @@
+---
+title: Webhooks
+description: Register webhook endpoints and verify incoming Luma events.
+---
+
+## Environment
+
+Add to `.env`:
+
+```bash
+LUMA_WEBHOOK_SECRET=whsec_...
+LUMA_WEBHOOK_EVENT_TYPES=guest.updated,guest.registered
+```
+
+## Register an endpoint
+
+```ts
+import { Luma } from "@alhwyn/luma";
+
+const luma = new Luma(process.env.LUMA_API_KEY!);
+
+const endpoint = await luma.webhooks.create({
+  url: "https://myapp.com/api/luma-webhook",
+  event_types: ["guest.updated", "guest.registered"],
+});
+
+// Save endpoint.secret as LUMA_WEBHOOK_SECRET
+```
+
+`event_types` also reads from `LUMA_WEBHOOK_EVENT_TYPES` via `webhookEventTypesFromEnv()`.
+
+## Verify incoming events
+
+```ts
+import { Luma } from "@alhwyn/luma";
+
+const webhook = new Luma(process.env.LUMA_API_KEY!).webhooks.client({
+  secret: process.env.LUMA_WEBHOOK_SECRET!,
+});
+
+// In your HTTP handler — pass the raw body, not re-serialized JSON
+const event = webhook.verify({
+  body: await req.text(),
+  headers: req.headers,
+});
+```
+
+Inbound-only handlers do not need an API key:
+
+```ts
+import { WebhookInboundClient } from "@alhwyn/luma";
+
+const webhook = new WebhookInboundClient({
+  secret: process.env.LUMA_WEBHOOK_SECRET!,
+});
+```
+
+## Handle an event
+
+```ts
+if (event.type === "guest.updated") {
+  const checkedIn = event.data.event_tickets.some((t) => t.checked_in_at !== null);
+  if (checkedIn) {
+    // e.g. send welcome email to event.data.user_email
+  }
+}
+```
+
+<Note>
+  Luma has no dedicated check-in webhook. Check-in arrives as `guest.updated` with `event_tickets[].checked_in_at` set. See the [Guest Updated webhook docs](https://docs.luma.com/reference/webhook_guest_updated).
+</Note>

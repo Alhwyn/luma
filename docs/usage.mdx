@@ -1,0 +1,37 @@
+---
+title: Usage
+description: Initialize the Luma client and call the API.
+---
+
+## Setup
+
+Get an API key from [Luma API keys](https://luma.com/calendar/manage/api-keys) (Luma Plus required).
+
+Add it to your environment:
+
+```bash
+LUMA_API_KEY=your-key-here
+```
+
+## Client
+
+```ts
+import { Luma } from "@alhwyn/luma";
+
+const luma = new Luma(process.env.LUMA_API_KEY!);
+```
+
+## Example
+
+Add guests to an event:
+
+```ts
+await luma.events.guests.add("evt-abc123", {
+  guests: [{ email: "jane@example.com", name: "Jane Doe" }],
+});
+```
+
+## Related
+
+- [Webhooks](/webhooks) — register endpoints and verify incoming events
+- [API reference](/api-reference) — full Luma REST API

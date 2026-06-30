@@ -1,0 +1,49 @@
+{
+  "$schema": "https://mintlify.com/docs.json",
+  "name": "Luma SDK",
+  "description": "Unofficial TypeScript SDK for the Luma public API",
+  "theme": "mint",
+  "colors": {
+    "primary": "#8B5CF6",
+    "light": "#F5F3FF",
+    "dark": "#5B21B6"
+  },
+  "navbar": {
+    "links": [
+      {
+        "label": "GitHub",
+        "href": "https://github.com/Alhwyn/luma"
+      },
+      {
+        "label": "Luma API",
+        "href": "https://docs.luma.com"
+      }
+    ]
+  },
+  "navigation": {
+    "tabs": [
+      {
+        "tab": "SDK",
+        "groups": [
+          {
+            "group": "Get started",
+            "pages": ["introduction", "install", "usage"]
+          },
+          {
+            "group": "Guides",
+            "pages": ["webhooks", "cli"]
+          }
+        ]
+      },
+      {
+        "tab": "API reference",
+        "openapi": "https://public-api.luma.com/openapi.json"
+      }
+    ]
+  },
+  "footer": {
+    "socials": {
+      "github": "https://github.com/Alhwyn/luma"
+    }
+  }
+}

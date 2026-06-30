@@ -48,9 +48,13 @@
     "test": "bun test",
     "prepublishOnly": "bun run build:api",
     "publish:github": "npm publish",
-    "generate:types": "openapi-typescript https://public-api.luma.com/openapi.json -o src/types/generated.d.ts"
+    "generate:types": "openapi-typescript https://public-api.luma.com/openapi.json -o src/types/generated.d.ts",
+    "docs:dev": "cd docs && bunx --bun mint dev",
+    "docs:validate": "cd docs && bunx --bun mint validate",
+    "docs:broken-links": "cd docs && bunx --bun mint broken-links"
   },
   "devDependencies": {
+    "mint": "^4.0.0",
     "@types/node": "^26.0.1",
     "bun-types": "^1.3.14",
     "openapi-typescript": "^7.13.0",
