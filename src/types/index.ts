@@ -69,7 +69,7 @@ export type Webhook = PostResponse<"/v2/webhooks/create">;
 export type WebhookCreateParams = PostBody<"/v2/webhooks/create">;
 export type WebhookUpdateParams = Omit<PostBody<"/v2/webhooks/update">, "id">;
 export type WebhookListParams = GetQuery<"/v1/webhooks/list">;
-export type WebhookEventType = WebhookCreateParams["event_types"][number];
+export type { WebhookScope, WebhookScope as WebhookEventType } from "../webhooks/scopes";
 
 export type WebhookEvent =
   | WebhookEventCreated
@@ -86,16 +86,7 @@ export type UnwrappedWebhookEvent = WebhookEvent & {
   timestamp: number;
 };
 
-export const WEBHOOK_EVENT_TYPES = new Set<Exclude<WebhookEventType, "*">>([
-  "calendar.event.added",
-  "calendar.person.subscribed",
-  "event.canceled",
-  "event.created",
-  "event.updated",
-  "guest.registered",
-  "guest.updated",
-  "ticket.registered",
-]);
+export { SCOPES, WEBHOOK_EVENT_TYPES } from "../webhooks/scopes";
 
 export type { paths, components } from "./generated";
 export type ListResponse<T> = SdkListResponse<T>;

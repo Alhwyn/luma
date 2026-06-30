@@ -123,7 +123,7 @@ describe("WebhooksResource", () => {
     expect(JSON.parse(capturedBody)).toEqual({ id: "wh-1" });
   });
 
-  describe("unwrap", () => {
+  describe("client", () => {
     const guestUpdatedBody = JSON.stringify({
       type: "guest.updated",
       data: {
@@ -134,17 +134,19 @@ describe("WebhooksResource", () => {
     });
     const timestamp = Math.floor(Date.now() / 1000);
 
+    const headers = (body: string) => ({
+      "Webhook-Signature": sign(body, webhook.secret, timestamp),
+      "Webhook-Id": "msg-1",
+      "Webhook-Timestamp": String(timestamp),
+    });
+
     test("returns a typed event when signature and headers are valid", () => {
       const luma = new Luma("test-key");
+      const inbound = luma.webhooks.client({ secret: webhook.secret });
 
-      const event = luma.webhooks.unwrap({
+      const event = inbound.verify({
         body: guestUpdatedBody,
-        secret: webhook.secret,
-        headers: {
-          "Webhook-Signature": sign(guestUpdatedBody, webhook.secret, timestamp),
-          "Webhook-Id": "msg-1",
-          "Webhook-Timestamp": String(timestamp),
-        },
+        headers: headers(guestUpdatedBody),
       });
 
       expect(event.type).toBe("guest.updated");
@@ -155,13 +157,30 @@ describe("WebhooksResource", () => {
       }
     });
 
+    test("reuses the same client instance across multiple calls", () => {
+      const luma = new Luma("test-key");
+      const inbound = luma.webhooks.client({ secret: webhook.secret });
+
+      const first = inbound.verify({
+        body: guestUpdatedBody,
+        headers: headers(guestUpdatedBody),
+      });
+      const second = inbound.verify({
+        body: guestUpdatedBody,
+        headers: headers(guestUpdatedBody),
+      });
+
+      expect(first.id).toBe("msg-1");
+      expect(second.id).toBe("msg-1");
+    });
+
     test("rejects an invalid signature", () => {
       const luma = new Luma("test-key");
+      const inbound = luma.webhooks.client({ secret: webhook.secret });
 
       expect(() =>
-        luma.webhooks.unwrap({
+        inbound.verify({
           body: guestUpdatedBody,
-          secret: webhook.secret,
           headers: {
             "Webhook-Signature": "t=0,v1=bad",
             "Webhook-Id": "msg-1",
@@ -172,31 +191,43 @@ describe("WebhooksResource", () => {
     });
 
     test("rejects an unknown event type", () => {
-      const body = JSON.stringify({ type: "guest.checked_in", data: {} });
+      const body = JSON.stringify({ type: "guest.confirmed", data: {} });
       const luma = new Luma("test-key");
+      const inbound = luma.webhooks.client({ secret: webhook.secret });
 
       expect(() =>
-        luma.webhooks.unwrap({
+        inbound.verify({
           body,
-          secret: webhook.secret,
-          headers: {
-            "Webhook-Signature": sign(body, webhook.secret, timestamp),
-            "Webhook-Id": "msg-1",
-            "Webhook-Timestamp": String(timestamp),
-          },
+          headers: headers(body),
         }),
       ).toThrow(ValidationError);
     });
 
     test("rejects missing webhook metadata headers", () => {
       const luma = new Luma("test-key");
+      const inbound = luma.webhooks.client({ secret: webhook.secret });
 
       expect(() =>
-        luma.webhooks.unwrap({
+        inbound.verify({
           body: guestUpdatedBody,
-          secret: webhook.secret,
           headers: {
             "Webhook-Signature": sign(guestUpdatedBody, webhook.secret, timestamp),
+          },
+        }),
+      ).toThrow(ValidationError);
+    });
+
+    test("rejects a Webhook-Timestamp that does not match the signature", () => {
+      const luma = new Luma("test-key");
+      const inbound = luma.webhooks.client({ secret: webhook.secret });
+
+      expect(() =>
+        inbound.verify({
+          body: guestUpdatedBody,
+          headers: {
+            "Webhook-Signature": sign(guestUpdatedBody, webhook.secret, timestamp),
+            "Webhook-Id": "msg-1",
+            "Webhook-Timestamp": String(timestamp + 1),
           },
         }),
       ).toThrow(ValidationError);

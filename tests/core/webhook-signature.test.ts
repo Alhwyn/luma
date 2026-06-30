@@ -10,18 +10,18 @@ const sign = (body: string, secret: string, timestamp: number): string => {
 };
 
 describe("verifyWebhookSignature", () => {
-  const body = '{"type":"guest.updated","data":{}}';
+  const body = JSON.stringify({ type: "guest.updated", data: {} });
   const secret = "whsec_test";
   const timestamp = Math.floor(Date.now() / 1000);
 
   test("accepts a valid signature", () => {
-    expect(() =>
+    expect(
       verifyWebhookSignature({
         body,
         secret,
         headers: { "Webhook-Signature": sign(body, secret, timestamp) },
       }),
-    ).not.toThrow();
+    ).toEqual({ timestamp });
   });
 
   test("accepts Uint8Array body", () => {
@@ -37,7 +37,10 @@ describe("verifyWebhookSignature", () => {
   test("rejects a tampered body", () => {
     expect(() =>
       verifyWebhookSignature({
-        body: '{"type":"guest.updated","data":{"tampered":true}}',
+        body: JSON.stringify({
+          type: "guest.updated",
+          data: { tampered: true },
+        }),
         secret,
         headers: { "Webhook-Signature": sign(body, secret, timestamp) },
       }),
@@ -54,13 +57,24 @@ describe("verifyWebhookSignature", () => {
     ).toThrow(WebhookSignatureError);
   });
 
-  test("rejects an expired timestamp", () => {
+  test("rejects a timestamp outside tolerance", () => {
     const expired = timestamp - 600;
     expect(() =>
       verifyWebhookSignature({
         body,
         secret,
         headers: { "Webhook-Signature": sign(body, secret, expired) },
+      }),
+    ).toThrow(WebhookSignatureError);
+  });
+
+  test("rejects a future timestamp outside tolerance", () => {
+    const future = timestamp + 600;
+    expect(() =>
+      verifyWebhookSignature({
+        body,
+        secret,
+        headers: { "Webhook-Signature": sign(body, secret, future) },
       }),
     ).toThrow(WebhookSignatureError);
   });
