@@ -6,43 +6,17 @@ import {
   verifyWebhookSignature,
   type VerifyWebhookSignatureParams,
 } from "../core/webhook-signature";
-import {
-  WEBHOOK_EVENT_TYPES,
-  type ApiWebhookListResponse,
-  type UnwrappedWebhookEvent,
-  type Webhook,
-  type WebhookCreateParams,
-  type WebhookEvent,
-  type WebhookEventType,
-  type WebhookListParams,
-  type WebhookUpdateParams,
+import { parseWebhookPayload } from "../webhooks/scopes";
+import type {
+  ApiWebhookListResponse,
+  UnwrappedWebhookEvent,
+  Webhook,
+  WebhookCreateParams,
+  WebhookListParams,
+  WebhookUpdateParams,
 } from "../types";
 
 export type UnwrapWebhookParams = VerifyWebhookSignatureParams;
-
-const isWebhookEvent = (value: unknown): value is WebhookEvent => {
-  if (typeof value !== "object" || value === null) return false;
-
-  const { type } = value as { type?: unknown };
-  return (
-    typeof type === "string" &&
-    WEBHOOK_EVENT_TYPES.has(type as Exclude<WebhookEventType, "*">)
-  );
-};
-
-const parseWebhookEvent = (rawBody: string): WebhookEvent => {
-  let parsed: unknown;
-
-  try {
-    parsed = JSON.parse(rawBody);
-  } catch {
-    throw new ValidationError("Invalid webhook JSON body");
-  }
-
-  if (!isWebhookEvent(parsed)) throw new ValidationError("Unknown webhook event type");
-
-  return parsed;
-};
 
 export class WebhooksResource {
   constructor(private readonly luma: Luma) {}
@@ -87,7 +61,7 @@ export class WebhooksResource {
         ? params.body
         : new TextDecoder().decode(params.body);
 
-    const event = parseWebhookEvent(rawBody);
+    const event = parseWebhookPayload(rawBody);
 
     const id = getWebhookHeader(params.headers, "webhook-id");
     const timestampHeader = getWebhookHeader(params.headers, "webhook-timestamp");

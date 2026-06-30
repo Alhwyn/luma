@@ -2,12 +2,13 @@ import { createHmac } from "crypto";
 import { describe, expect, test } from "bun:test";
 import { ValidationError, WebhookSignatureError } from "../../src/core/errors";
 import { Luma } from "../../src/luma";
+import { WebhookScopes } from "../../src/webhooks/scopes";
 import { createMockFetch, jsonResponse } from "../helpers/mock-fetch";
 
 const webhook = {
   id: "wh-1",
   url: "https://example.com/webhook",
-  event_types: ["guest.updated"] as const,
+  event_types: [WebhookScopes.GuestUpdated] as const,
   status: "active" as const,
   secret: "whsec_test",
   created_at: "2026-01-01T00:00:00.000Z",
@@ -34,14 +35,14 @@ describe("WebhooksResource", () => {
 
     const result = await luma.webhooks.create({
       url: webhook.url,
-      event_types: ["guest.updated"],
+      event_types: [WebhookScopes.GuestUpdated],
     });
 
     expect(result).toEqual(webhook);
     expect(capturedUrl).toBe("https://public-api.luma.com/v2/webhooks/create");
     expect(JSON.parse(capturedBody)).toEqual({
       url: webhook.url,
-      event_types: ["guest.updated"],
+      event_types: [WebhookScopes.GuestUpdated],
     });
   });
 
@@ -125,7 +126,7 @@ describe("WebhooksResource", () => {
 
   describe("unwrap", () => {
     const guestUpdatedBody = JSON.stringify({
-      type: "guest.updated",
+      type: WebhookScopes.GuestUpdated,
       data: {
         id: "gst-1",
         user_email: "jane@example.com",
@@ -147,10 +148,10 @@ describe("WebhooksResource", () => {
         },
       });
 
-      expect(event.type).toBe("guest.updated");
+      expect(event.type).toBe(WebhookScopes.GuestUpdated);
       expect(event.id).toBe("msg-1");
       expect(event.timestamp).toBe(timestamp);
-      if (event.type === "guest.updated") {
+      if (event.type === WebhookScopes.GuestUpdated) {
         expect(event.data.user_email).toBe("jane@example.com");
       }
     });
@@ -172,7 +173,7 @@ describe("WebhooksResource", () => {
     });
 
     test("rejects an unknown event type", () => {
-      const body = JSON.stringify({ type: "guest.checked_in", data: {} });
+      const body = JSON.stringify({ type: "guest.confirmed", data: {} });
       const luma = new Luma("test-key");
 
       expect(() =>

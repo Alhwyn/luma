@@ -2,6 +2,7 @@ import { createHmac } from "crypto";
 import { describe, expect, test } from "bun:test";
 import { WebhookSignatureError } from "../../src/core/errors";
 import { verifyWebhookSignature } from "../../src/core/webhook-signature";
+import { WebhookScopes } from "../../src/webhooks/scopes";
 
 const sign = (body: string, secret: string, timestamp: number): string => {
   const payload = `${timestamp}.${body}`;
@@ -10,7 +11,7 @@ const sign = (body: string, secret: string, timestamp: number): string => {
 };
 
 describe("verifyWebhookSignature", () => {
-  const body = '{"type":"guest.updated","data":{}}';
+  const body = JSON.stringify({ type: WebhookScopes.GuestUpdated, data: {} });
   const secret = "whsec_test";
   const timestamp = Math.floor(Date.now() / 1000);
 
@@ -37,7 +38,10 @@ describe("verifyWebhookSignature", () => {
   test("rejects a tampered body", () => {
     expect(() =>
       verifyWebhookSignature({
-        body: '{"type":"guest.updated","data":{"tampered":true}}',
+        body: JSON.stringify({
+          type: WebhookScopes.GuestUpdated,
+          data: { tampered: true },
+        }),
         secret,
         headers: { "Webhook-Signature": sign(body, secret, timestamp) },
       }),

@@ -59,12 +59,22 @@ await luma.events.guests.add("evt-abc123", {
 Register a webhook endpoint and verify incoming events with `unwrap()`:
 
 ```ts
+import { Luma, WebhookScopes, webhookEventTypesFromEnv } from "@alhwyn/luma";
+
+const luma = new Luma(process.env.LUMA_API_KEY!);
+
 // Outbound: create a webhook endpoint
 const endpoint = await luma.webhooks.create({
   url: "https://myapp.com/api/luma-webhook",
-  event_types: ["guest.updated"],
+  event_types: webhookEventTypesFromEnv(),
+  // or use named scopes directly:
+  // event_types: [WebhookScopes.GuestUpdated, WebhookScopes.GuestRegistered],
 });
-// Store endpoint.secret (whsec_...) securely
+// Store endpoint.secret (whsec_...) securely in LUMA_WEBHOOK_SECRET
+
+// .env example:
+// LUMA_WEBHOOK_EVENT_TYPES=guest.updated,guest.registered
+// or scope names: GuestUpdated,GuestRegistered
 
 // Inbound: verify and parse in your HTTP handler
 const event = luma.webhooks.unwrap({
@@ -73,7 +83,7 @@ const event = luma.webhooks.unwrap({
   secret: process.env.LUMA_WEBHOOK_SECRET!,
 });
 
-if (event.type === "guest.updated") {
+if (event.type === WebhookScopes.GuestUpdated) {
   const justCheckedIn = event.data.event_tickets.some(
     (ticket) => ticket.checked_in_at !== null,
   );
