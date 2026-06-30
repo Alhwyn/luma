@@ -4,40 +4,52 @@ import {
   isWebhookScope,
   parseWebhookEventTypes,
   parseWebhookPayload,
-  WebhookScopes,
+  SCOPES,
   webhookEventTypesFromEnv,
 } from "../../src/webhooks/scopes";
 
-describe("WebhookScopes", () => {
+describe("SCOPES", () => {
+  test("lists all valid webhook scope values", () => {
+    expect(SCOPES).toEqual([
+      "*",
+      "calendar.event.added",
+      "calendar.person.subscribed",
+      "event.canceled",
+      "event.created",
+      "event.updated",
+      "guest.registered",
+      "guest.updated",
+      "ticket.registered",
+    ]);
+  });
+
   test("isWebhookScope recognizes API scope values", () => {
-    expect(isWebhookScope(WebhookScopes.GuestUpdated)).toBe(true);
+    expect(isWebhookScope("guest.updated")).toBe(true);
     expect(isWebhookScope("guest.confirmed")).toBe(false);
   });
 
   test("parseWebhookEventTypes splits comma-separated API values", () => {
-    expect(
-      parseWebhookEventTypes(
-        `${WebhookScopes.GuestUpdated},${WebhookScopes.GuestRegistered}`,
-      ),
-    ).toEqual([WebhookScopes.GuestUpdated, WebhookScopes.GuestRegistered]);
-  });
-
-  test("parseWebhookEventTypes accepts scope names", () => {
-    expect(parseWebhookEventTypes("GuestUpdated,GuestRegistered")).toEqual([
-      WebhookScopes.GuestUpdated,
-      WebhookScopes.GuestRegistered,
+    expect(parseWebhookEventTypes("guest.updated,guest.registered")).toEqual([
+      "guest.updated",
+      "guest.registered",
     ]);
   });
 
   test("parseWebhookEventTypes trims whitespace", () => {
-    expect(parseWebhookEventTypes(" GuestUpdated , guest.registered ")).toEqual([
-      WebhookScopes.GuestUpdated,
-      WebhookScopes.GuestRegistered,
+    expect(parseWebhookEventTypes(" guest.updated , guest.registered ")).toEqual([
+      "guest.updated",
+      "guest.registered",
     ]);
   });
 
   test("parseWebhookEventTypes accepts all scopes", () => {
-    expect(parseWebhookEventTypes("All")).toEqual([WebhookScopes.All]);
+    expect(parseWebhookEventTypes("*")).toEqual(["*"]);
+  });
+
+  test("parseWebhookEventTypes rejects PascalCase scope names", () => {
+    expect(() => parseWebhookEventTypes("GuestUpdated,GuestRegistered")).toThrow(
+      ValidationError,
+    );
   });
 
   test("parseWebhookEventTypes rejects unknown types", () => {
@@ -49,9 +61,7 @@ describe("WebhookScopes", () => {
   });
 
   test("webhookEventTypesFromEnv reads from argument", () => {
-    expect(webhookEventTypesFromEnv("GuestUpdated")).toEqual([
-      WebhookScopes.GuestUpdated,
-    ]);
+    expect(webhookEventTypesFromEnv("guest.updated")).toEqual(["guest.updated"]);
   });
 
   test("webhookEventTypesFromEnv throws when unset", () => {
@@ -62,12 +72,12 @@ describe("WebhookScopes", () => {
   test("parseWebhookPayload parses a valid webhook body", () => {
     const payload = parseWebhookPayload(
       JSON.stringify({
-        type: WebhookScopes.GuestUpdated,
+        type: "guest.updated",
         data: { user_email: "jane@example.com" },
       }),
     );
 
-    expect(payload.type).toBe(WebhookScopes.GuestUpdated);
+    expect(payload.type).toBe("guest.updated");
   });
 
   test("parseWebhookPayload rejects unknown types", () => {

@@ -2,13 +2,12 @@ import { createHmac } from "crypto";
 import { describe, expect, test } from "bun:test";
 import { ValidationError, WebhookSignatureError } from "../../src/core/errors";
 import { Luma } from "../../src/luma";
-import { WebhookScopes } from "../../src/webhooks/scopes";
 import { createMockFetch, jsonResponse } from "../helpers/mock-fetch";
 
 const webhook = {
   id: "wh-1",
   url: "https://example.com/webhook",
-  event_types: [WebhookScopes.GuestUpdated] as const,
+  event_types: ["guest.updated"] as const,
   status: "active" as const,
   secret: "whsec_test",
   created_at: "2026-01-01T00:00:00.000Z",
@@ -35,14 +34,14 @@ describe("WebhooksResource", () => {
 
     const result = await luma.webhooks.create({
       url: webhook.url,
-      event_types: [WebhookScopes.GuestUpdated],
+      event_types: ["guest.updated"],
     });
 
     expect(result).toEqual(webhook);
     expect(capturedUrl).toBe("https://public-api.luma.com/v2/webhooks/create");
     expect(JSON.parse(capturedBody)).toEqual({
       url: webhook.url,
-      event_types: [WebhookScopes.GuestUpdated],
+      event_types: ["guest.updated"],
     });
   });
 
@@ -126,7 +125,7 @@ describe("WebhooksResource", () => {
 
   describe("client", () => {
     const guestUpdatedBody = JSON.stringify({
-      type: WebhookScopes.GuestUpdated,
+      type: "guest.updated",
       data: {
         id: "gst-1",
         user_email: "jane@example.com",
@@ -150,10 +149,10 @@ describe("WebhooksResource", () => {
         headers: headers(guestUpdatedBody),
       });
 
-      expect(event.type).toBe(WebhookScopes.GuestUpdated);
+      expect(event.type).toBe("guest.updated");
       expect(event.id).toBe("msg-1");
       expect(event.timestamp).toBe(timestamp);
-      if (event.type === WebhookScopes.GuestUpdated) {
+      if (event.type === "guest.updated") {
         expect(event.data.user_email).toBe("jane@example.com");
       }
     });

@@ -9,9 +9,9 @@ export {
   isWebhookScope,
   parseWebhookEventTypes,
   parseWebhookPayload,
-  webhookEventTypesFromEnv,
-  WebhookScopes,
+  SCOPES,
   WEBHOOK_EVENT_TYPES,
+  webhookEventTypesFromEnv,
 } from "./webhooks/scopes";
 export type { IncomingWebhookScope, WebhookScope } from "./webhooks/scopes";
 export type { ListResponse } from "./core/pagination";
