@@ -10,22 +10,13 @@ A TypeScript client for the [Luma public API](https://public-api.luma.com). Not 
 
 Packages are published to [GitHub Packages](https://github.com/Alhwyn/luma/packages).
 
-**1. Authenticate** — create a [GitHub token](https://github.com/settings/tokens) with `read:packages`, then add to `~/.npmrc`:
-
-```
-@alhwyn:registry=https://npm.pkg.github.com
-//npm.pkg.github.com/:_authToken=YOUR_GITHUB_TOKEN
-```
-
-See [`.npmrc.example`](.npmrc.example) for a template.
-
-**2. Install the SDK:**
+**1. Install the SDK:**
 
 ```bash
 bun add @alhwyn/luma
 ```
 
-**3. Install the CLI (optional):**
+**2. Install the CLI (optional):**
 
 ```bash
 bun add @alhwyn/luma-cli
@@ -53,6 +44,63 @@ await luma.events.guests.add("evt-abc123", {
   ],
 });
 ```
+
+## Webhooks
+
+Register a webhook endpoint and verify incoming events with `client()`:
+
+```ts
+import { Luma, WebhookScopes, webhookEventTypesFromEnv } from "@alhwyn/luma";
+
+const luma = new Luma(process.env.LUMA_API_KEY!);
+
+// Outbound: create a webhook endpoint
+const endpoint = await luma.webhooks.create({
+  url: "https://myapp.com/api/luma-webhook",
+  event_types: webhookEventTypesFromEnv(),
+  // or use named scopes directly:
+  // event_types: [WebhookScopes.GuestUpdated, WebhookScopes.GuestRegistered],
+});
+// Store endpoint.secret (whsec_...) securely in LUMA_WEBHOOK_SECRET
+
+// .env example:
+// LUMA_WEBHOOK_EVENT_TYPES=guest.updated,guest.registered
+// or scope names: GuestUpdated,GuestRegistered
+
+// Inbound: bind secret once, verify each request in your HTTP handler
+const webhook = luma.webhooks.client({
+  secret: process.env.LUMA_WEBHOOK_SECRET!,
+});
+
+const event = webhook.verify({
+  body: rawBody,       // raw request body (string), not re-serialized JSON
+  headers: req.headers,
+});
+
+if (event.type === WebhookScopes.GuestUpdated) {
+  const justCheckedIn = event.data.event_tickets.some(
+    (ticket) => ticket.checked_in_at !== null,
+  );
+  if (justCheckedIn) {
+    await sendWelcomeEmail({
+      to: event.data.user_email,
+      name: event.data.user_name,
+    });
+  }
+}
+```
+
+For inbound-only handlers (no API key), use `WebhookInboundClient` directly:
+
+```ts
+import { WebhookInboundClient, WebhookScopes } from "@alhwyn/luma";
+
+const webhook = new WebhookInboundClient({
+  secret: process.env.LUMA_WEBHOOK_SECRET!,
+});
+```
+
+Luma does not have a dedicated check-in webhook — check-in fires `guest.updated` with `event_tickets[].checked_in_at` set. See the [Guest Updated webhook docs](https://docs.luma.com/reference/webhook_guest_updated).
 
 ## CLI
 
@@ -85,24 +133,3 @@ Packages publish to GitHub Packages as `@alhwyn/luma` and `@alhwyn/luma-cli`.
 1. Push your changes to `main`
 2. Create a GitHub release with tag `v0.1.0` (or bump version in `package.json` first)
 3. The [Publish workflow](.github/workflows/publish.yml) runs on `release: published` and publishes both packages
-
-### Manual
-
-```bash
-# one-time: token with write:packages in NODE_AUTH_TOKEN
-export NODE_AUTH_TOKEN=ghp_...
-
-# SDK first
-bun run build:api
-npm publish
-
-# CLI second — point at published SDK, not file:..
-cd cli
-npm pkg set 'dependencies[@alhwyn/luma]=^0.1.0'
-bun run build
-npm publish
-```
-
-Verify with `npm publish --dry-run` before the first release.
-
-After publish, packages appear under **Packages** on the GitHub repo sidebar.

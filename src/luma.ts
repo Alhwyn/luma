@@ -2,12 +2,14 @@ import { request as httpRequest } from "./core/http";
 import type { ClientOptions, QueryParams } from "./core/types"; 
 import { CalendarResource } from "./resources/calendar"; 
 import { EventsResource } from "./resources/events";  
-import { UsersResource } from "./resources/users";   
+import { UsersResource } from "./resources/users";
+import { WebhooksResource } from "./resources/webhooks";
 
 export class Luma {
   readonly users: UsersResource;
-  readonly calendar: CalendarResource; 
-  readonly events: EventsResource;  
+  readonly calendar: CalendarResource;
+  readonly events: EventsResource;
+  readonly webhooks: WebhooksResource;
 
   constructor(
     private readonly apiKey: string,
@@ -16,6 +18,7 @@ export class Luma {
     this.users = new UsersResource(this);
     this.calendar = new CalendarResource(this);
     this.events = new EventsResource(this);
+    this.webhooks = new WebhooksResource(this);
   }
 
   request<T>(

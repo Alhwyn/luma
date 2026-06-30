@@ -32,6 +32,13 @@ export class RateLimitError extends LumaError {
   }
 }
 
+export class WebhookSignatureError extends LumaError {
+  constructor(message: string, body?: unknown) {
+    super(401, message, body); 
+    this.name = "WebhookSignatureError";
+  }
+}
+
 export const createError = (status: number, message: string, body?: unknown): LumaError => {
   switch (status) {
     case 400:
