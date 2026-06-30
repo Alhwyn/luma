@@ -6,6 +6,8 @@ A TypeScript client for the [Luma public API](https://public-api.luma.com). Not 
 
 **Note:** You need a [Luma Plus](https://luma.com) organization to use the API. See the [Getting Started guide](https://docs.luma.com/reference/getting-started-with-your-api) for setup and authentication.
 
+**Documentation:** [alhwyn.mintlify.site](https://alhwyn.mintlify.site/introduction) — install, authentication, API guides, webhooks, and CLI.
+
 ## Install
 
 Packages are published to [GitHub Packages](https://github.com/Alhwyn/luma/packages).
