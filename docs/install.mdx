@@ -1,0 +1,64 @@
+---
+title: Install
+description: Install @alhwyn/luma and @alhwyn/luma-cli from GitHub Packages.
+---
+
+Packages are published to [GitHub Packages](https://github.com/Alhwyn/luma/packages).
+
+## 1. Create a GitHub PAT
+
+Create a [personal access token](https://github.com/settings/tokens) with the **`read:packages`** scope.
+
+If the repository is under an organization with SSO, authorize the token for that organization.
+
+## 2. Configure registry auth
+
+Add these files to your project (or copy from the [luma repo](https://github.com/Alhwyn/luma)):
+
+**`.npmrc`**
+
+```ini
+@alhwyn:registry=https://npm.pkg.github.com
+//npm.pkg.github.com/:_authToken=${GITHUB_TOKEN}
+```
+
+**`bunfig.toml`**
+
+```toml
+[install.scopes]
+"@alhwyn" = { url = "https://npm.pkg.github.com", token = "$GITHUB_TOKEN" }
+```
+
+Set the token in `.env` (Bun loads `.env` automatically):
+
+```bash
+GITHUB_TOKEN=ghp_your_token_here
+```
+
+## 3. Install
+
+### SDK
+
+```bash
+bun add @alhwyn/luma
+```
+
+### CLI (optional)
+
+```bash
+bun add @alhwyn/luma-cli
+```
+
+## Troubleshooting
+
+| Symptom | Fix |
+| --- | --- |
+| `401 Unauthorized` on install | `GITHUB_TOKEN` missing, expired, or lacks `read:packages` |
+| 401 with token set | Authorize PAT for SSO org |
+| Version not found | Package not published — check [GitHub Packages](https://github.com/Alhwyn/luma/packages) |
+
+## Next steps
+
+1. [Authentication](/authentication) — set up `LUMA_API_KEY`
+2. [Test your setup](/test-your-setup) — verify against the live Luma API
+3. [Usage](/usage) — start calling the SDK

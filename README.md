@@ -12,17 +12,45 @@ A TypeScript client for the [Luma public API](https://public-api.luma.com). Not 
 
 Packages are published to [GitHub Packages](https://github.com/Alhwyn/luma/packages).
 
-**1. Install the SDK:**
+### 1. Authenticate with GitHub Packages
+
+Create a [personal access token](https://github.com/settings/tokens) with **`read:packages`**.
+
+Add to your project:
+
+**`.npmrc`**
+
+```ini
+@alhwyn:registry=https://npm.pkg.github.com
+//npm.pkg.github.com/:_authToken=${GITHUB_TOKEN}
+```
+
+**`bunfig.toml`**
+
+```toml
+[install.scopes]
+"@alhwyn" = { url = "https://npm.pkg.github.com", token = "$GITHUB_TOKEN" }
+```
+
+Set in `.env`:
+
+```bash
+GITHUB_TOKEN=ghp_your_token
+```
+
+### 2. Install the SDK
 
 ```bash
 bun add @alhwyn/luma
 ```
 
-**2. Install the CLI (optional):**
+### 3. Install the CLI (optional)
 
 ```bash
 bun add @alhwyn/luma-cli
 ```
+
+If you get **401 Unauthorized**, your `GITHUB_TOKEN` is missing, expired, or lacks `read:packages`. See [docs/install.mdx](docs/install.mdx) for details.
 
 
 
