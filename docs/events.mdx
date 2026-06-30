@@ -1,0 +1,157 @@
+---
+title: Events
+description: List, create, and update events, guests, and ticket types.
+---
+
+Events are the core resource in Luma. The SDK exposes them through `luma.events` with nested resources for guests and ticket types.
+
+## List events
+
+```ts
+const { data, hasMore, nextCursor } = await luma.events.list({
+  pagination_limit: 20,
+});
+```
+
+<ResponseField name="data" type="EventListEntry[]">
+  Events on your calendar for this page.
+</ResponseField>
+
+<ResponseField name="hasMore" type="boolean">
+  Whether more pages exist.
+</ResponseField>
+
+<ResponseField name="nextCursor" type="string | null">
+  Pass as `pagination_cursor` to fetch the next page.
+</ResponseField>
+
+### Pagination
+
+```ts
+let cursor: string | undefined;
+
+do {
+  const page = await luma.events.list({
+    pagination_limit: 50,
+    pagination_cursor: cursor,
+  });
+
+  for (const event of page.data) {
+    console.log(event.name);
+  }
+
+  cursor = page.nextCursor ?? undefined;
+} while (page.hasMore && cursor);
+```
+
+## Get an event
+
+```ts
+const event = await luma.events.get("evt-abc123");
+console.log(event.name, event.start_at);
+```
+
+Use the event `api_id` from list responses as the ID.
+
+## Create an event
+
+```ts
+const event = await luma.events.create({
+  name: "SDK test event",
+  start_at: "2026-07-01T18:00:00.000Z",
+  end_at: "2026-07-01T20:00:00.000Z",
+  timezone: "America/Los_Angeles",
+});
+```
+
+See the [Create Event API reference](https://docs.luma.com/reference/post_v1-events-create) for all fields.
+
+## Update an event
+
+```ts
+await luma.events.update("evt-abc123", {
+  name: "Updated title",
+});
+```
+
+## Guests
+
+Access guests through `luma.events.guests`.
+
+### List guests
+
+```ts
+const { data: guests } = await luma.events.guests.list("evt-abc123", {
+  pagination_limit: 50,
+});
+```
+
+### Get a guest
+
+```ts
+const guest = await luma.events.guests.get("evt-abc123", "gst-xyz789");
+```
+
+### Add guests
+
+```ts
+await luma.events.guests.add("evt-abc123", {
+  guests: [
+    { email: "jane@example.com", name: "Jane Doe" },
+    { email: "john@example.com", name: "John Doe" },
+  ],
+});
+```
+
+### Update guest status
+
+```ts
+await luma.events.guests.updateStatus("evt-abc123", "gst-xyz789", {
+  approval_status: "approved",
+});
+```
+
+## Ticket types
+
+Access ticket types through `luma.events.ticketTypes`.
+
+### List ticket types
+
+```ts
+const { data: types } = await luma.events.ticketTypes.list("evt-abc123");
+```
+
+### Create a ticket type
+
+```ts
+const ticketType = await luma.events.ticketTypes.create("evt-abc123", {
+  name: "General admission",
+  type: "free",
+});
+```
+
+### Update or delete
+
+```ts
+await luma.events.ticketTypes.update("evt-abc123", ticketType.api_id, {
+  name: "Early bird",
+});
+
+await luma.events.ticketTypes.delete("evt-abc123", ticketType.api_id);
+```
+
+## TypeScript types
+
+Import entity and param types from the package:
+
+```ts
+import type {
+  Event,
+  EventListEntry,
+  Guest,
+  GuestAddParams,
+  TicketType,
+} from "@alhwyn/luma";
+```
+
+Types are generated from the [Luma OpenAPI spec](https://public-api.luma.com/openapi.json) and stay in sync with the official API.

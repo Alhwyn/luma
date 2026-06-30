@@ -1,37 +1,86 @@
 ---
 title: Usage
-description: Initialize the Luma client and call the API.
+description: Initialize the Luma client and call the unofficial SDK.
 ---
 
-## Setup
-
-Get an API key from [Luma API keys](https://luma.com/calendar/manage/api-keys) (Luma Plus required).
-
-Add it to your environment:
-
-```bash
-LUMA_API_KEY=your-key-here
-```
-
-## Client
+## Quick start
 
 ```ts
 import { Luma } from "@alhwyn/luma";
 
 const luma = new Luma(process.env.LUMA_API_KEY!);
+
+// Who am I?
+const user = await luma.users.get();
+
+// Events on my calendar
+const { data: events } = await luma.events.list({ pagination_limit: 10 });
 ```
 
-## Example
+If you have not verified your API key yet, start with [Test your setup](/test-your-setup).
 
-Add guests to an event:
+## Resources
+
+The `Luma` client groups methods by API resource:
+
+| Property | Methods | Guide |
+| --- | --- | --- |
+| `luma.users` | `get()` | below |
+| `luma.calendar` | `get()`, `update()` | [Calendar](/calendar) |
+| `luma.events` | `get()`, `list()`, `create()`, `update()` | [Events](/events) |
+| `luma.events.guests` | `list()`, `get()`, `add()`, `updateStatus()` | [Events](/events) |
+| `luma.events.ticketTypes` | `list()`, `get()`, `create()`, `update()`, `delete()` | [Events](/events) |
+| `luma.webhooks` | `create()`, `get()`, `list()`, `update()`, `delete()`, `client()` | [Webhooks](/webhooks) |
+
+## Users
 
 ```ts
-await luma.events.guests.add("evt-abc123", {
-  guests: [{ email: "jane@example.com", name: "Jane Doe" }],
-});
+const user = await luma.users.get();
+// { id, email, name, ... }
 ```
+
+`users.get()` is the recommended smoke test — it reads only your own profile and confirms authentication.
+
+## List responses
+
+List methods return a normalized shape:
+
+```ts
+const page = await luma.events.list({ pagination_limit: 20 });
+
+page.data;        // items for this page
+page.hasMore;     // more pages available?
+page.nextCursor;  // pass as pagination_cursor for the next page
+```
+
+The SDK maps Luma's `entries` / `has_more` / `next_cursor` fields into this interface. See [Events](/events) for a full pagination example.
+
+## Raw requests
+
+For endpoints not yet wrapped by a resource method, use `luma.request()`:
+
+```ts
+const result = await luma.request<{ entries: unknown[] }>(
+  "GET",
+  "/v1/some-endpoint",
+  { query: { foo: "bar" } },
+);
+```
+
+Prefer the typed resource methods when they exist. Use `request()` as an escape hatch until the SDK adds coverage.
+
+## TypeScript
+
+All entity types are exported from the package:
+
+```ts
+import type { User, Event, Guest, WebhookEvent } from "@alhwyn/luma";
+```
+
+Types are generated from the [official OpenAPI spec](https://public-api.luma.com/openapi.json). For request/response details beyond what the guides cover, see [API overview](/api-overview).
 
 ## Related
 
-- [Webhooks](/webhooks) — register endpoints and verify incoming events
-- [API reference](/api-reference) — full Luma REST API
+- [Authentication](/authentication) — API keys and client options
+- [Test your setup](/test-your-setup) — verify against the live API
+- [Error handling](/error-handling) — catch typed errors

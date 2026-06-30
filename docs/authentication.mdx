@@ -1,0 +1,74 @@
+---
+title: Authentication
+description: Get a Luma API key and configure the SDK.
+---
+
+The SDK authenticates with the `x-luma-api-key` header on every request to `https://public-api.luma.com`.
+
+## Prerequisites
+
+<Steps>
+  <Step title="Luma Plus">
+    API access requires a [Luma Plus](https://luma.com) organization. See the [official getting started guide](https://docs.luma.com/reference/getting-started-with-your-api).
+  </Step>
+  <Step title="Create an API key">
+    Open [Luma API keys](https://luma.com/calendar/manage/api-keys) and create a key for your calendar.
+  </Step>
+  <Step title="Store the key securely">
+    Never commit API keys to git. Use environment variables or a secrets manager.
+  </Step>
+</Steps>
+
+## Environment variables
+
+Copy [`.env.example`](https://github.com/Alhwyn/luma/blob/main/.env.example) to `.env` in your project root:
+
+```bash
+cp .env.example .env
+```
+
+Set your key:
+
+```bash
+LUMA_API_KEY=your-key-here
+```
+
+Bun loads `.env` automatically. In Node.js, load it yourself or export the variable in your shell.
+
+## Initialize the client
+
+```ts
+import { Luma } from "@alhwyn/luma";
+
+const luma = new Luma(process.env.LUMA_API_KEY!);
+```
+
+Pass the key as the first constructor argument. The SDK sends it on every outbound request.
+
+## Client options
+
+```ts
+const luma = new Luma(process.env.LUMA_API_KEY!, {
+  baseUrl: "https://public-api.luma.com", // default
+  fetch: customFetch, // optional, for testing or proxies
+});
+```
+
+Use `baseUrl` only if you need to point at a different host (for example, a mock server in tests).
+
+## Verify your key works
+
+Run a smoke test against the live API:
+
+```ts
+const user = await luma.users.get();
+console.log(user.email);
+```
+
+Or use the CLI:
+
+```bash
+luma users get
+```
+
+See [Test your setup](/test-your-setup) for a full walkthrough.

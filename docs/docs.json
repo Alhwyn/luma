@@ -27,16 +27,27 @@
         "groups": [
           {
             "group": "Get started",
-            "pages": ["introduction", "install", "usage"]
+            "pages": [
+              "introduction",
+              "install",
+              "authentication",
+              "test-your-setup",
+              "usage"
+            ]
           },
           {
-            "group": "Guides",
-            "pages": ["webhooks", "cli"]
+            "group": "Resources",
+            "pages": ["events", "calendar", "webhooks"]
+          },
+          {
+            "group": "Reference",
+            "pages": ["error-handling", "cli"]
           }
         ]
       },
       {
         "tab": "API reference",
+        "pages": ["api-overview"],
         "openapi": "https://public-api.luma.com/openapi.json"
       }
     ]

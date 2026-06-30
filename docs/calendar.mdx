@@ -1,0 +1,31 @@
+---
+title: Calendar
+description: Read and update your Luma calendar settings.
+---
+
+Your Luma calendar is the container for events. The SDK exposes it through `luma.calendar`.
+
+## Get your calendar
+
+```ts
+const calendar = await luma.calendar.get();
+console.log(calendar.name, calendar.api_id);
+```
+
+This maps to `GET /v1/calendars/get` and returns the calendar tied to your API key.
+
+## Update calendar settings
+
+```ts
+await luma.calendar.update(calendar.api_id, {
+  name: "My events calendar",
+});
+```
+
+Pass the `calendar_id` from `calendar.get()` plus the fields you want to change. See the [Update Calendar API reference](https://docs.luma.com/reference/post_v1-calendars-update) for available fields.
+
+## TypeScript types
+
+```ts
+import type { Calendar, CalendarUpdateParams } from "@alhwyn/luma";
+```

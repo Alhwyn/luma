@@ -1,0 +1,139 @@
+---
+title: Test your setup
+description: Verify the SDK works against the live Luma API.
+---
+
+Use these steps to confirm your API key, SDK install, and network access before building an integration.
+
+<Note>
+  All examples below call the **real Luma API** at `https://public-api.luma.com`. Use a test calendar and non-production data when possible.
+</Note>
+
+## Prerequisites
+
+- [Luma Plus](https://luma.com) organization
+- API key from [Luma API keys](https://luma.com/calendar/manage/api-keys)
+- `@alhwyn/luma` installed ([Install](/install))
+
+## Option 1: CLI smoke test
+
+The fastest way to confirm your key works:
+
+```bash
+export LUMA_API_KEY=your-key-here
+luma users get
+```
+
+Expected output: your email and user ID, for example `you@example.com (usr-...)`.
+
+List events on your calendar:
+
+```bash
+luma events list
+luma events list --limit 5
+```
+
+If either command fails with `AuthenticationError`, double-check the key and that your organization has API access.
+
+## Option 2: One-line SDK script
+
+Create `smoke.ts`:
+
+```ts
+import { Luma } from "@alhwyn/luma";
+
+const luma = new Luma(process.env.LUMA_API_KEY!);
+
+const user = await luma.users.get();
+console.log("Authenticated as:", user.email);
+
+const { data: events } = await luma.events.list({ pagination_limit: 3 });
+console.log(
+  "Recent events:",
+  events.map((e) => e.name ?? e.api_id),
+);
+```
+
+Run it:
+
+```bash
+LUMA_API_KEY=your-key-here bun smoke.ts
+```
+
+## Option 3: Integration tests in this repo
+
+The SDK includes a live integration test that skips when `LUMA_API_KEY` is unset:
+
+```bash
+export LUMA_API_KEY=your-key-here
+bun test tests/integration/get-self.test.ts
+```
+
+This calls `GET /v1/users/get-self` through the SDK and asserts the response has `id` and `email`.
+
+## Option 4: API reference playground
+
+Switch to the **API reference** tab in these docs. Mintlify loads the official Luma OpenAPI spec from `https://public-api.luma.com/openapi.json`.
+
+<Steps>
+  <Step title="Pick an endpoint">
+    Start with `GET /v1/users/get-self` — it only reads your own profile.
+  </Step>
+  <Step title="Add your API key">
+    In the playground, set the `x-luma-api-key` header to your key.
+  </Step>
+  <Step title="Send the request">
+    Compare the JSON response with what the SDK returns from `luma.users.get()`.
+  </Step>
+</Steps>
+
+Browse the full endpoint list in [API overview](/api-overview) or use the sidebar in this tab.
+
+## Option 5: curl (no SDK)
+
+Compare raw HTTP with SDK behavior:
+
+```bash
+curl -s https://public-api.luma.com/v1/users/get-self \
+  -H "x-luma-api-key: $LUMA_API_KEY" | jq
+```
+
+A `200` response with your user object means the key is valid. A `401` means the key is missing or invalid.
+
+## Test guests on a real event
+
+Once the smoke test passes, try a read-only call on an event you own:
+
+```ts
+const { data: events } = await luma.events.list({ pagination_limit: 1 });
+const eventId = events[0]?.api_id;
+
+if (eventId) {
+  const event = await luma.events.get(eventId);
+  console.log(event.name);
+
+  const { data: guests } = await luma.events.guests.list(eventId, {
+    pagination_limit: 5,
+  });
+  console.log(`${guests.length} guests loaded`);
+}
+```
+
+<Warning>
+  `events.guests.add` and `events.create` write data. Test writes on a dedicated test event, not a live production event.
+</Warning>
+
+## Troubleshooting
+
+| Error | Likely cause |
+| --- | --- |
+| `AuthenticationError` (401) | Invalid or missing `LUMA_API_KEY` |
+| `ValidationError` (400) | Wrong parameter shape — check [API overview](/api-overview) or the sidebar |
+| `RateLimitError` (429) | Too many requests — back off and retry |
+| Missing `LUMA_API_KEY` in CLI | Export the variable or add it to `.env` in the current directory |
+
+## Next steps
+
+- [Usage](/usage) — client patterns and typed responses
+- [Events](/events) — list, create, and manage guests
+- [Webhooks](/webhooks) — receive real-time updates

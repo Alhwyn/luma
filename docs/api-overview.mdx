@@ -1,0 +1,40 @@
+---
+title: API overview
+description: Interactive reference for the official Luma REST API.
+sidebarTitle: Overview
+---
+
+This tab documents the **official Luma API** from the live OpenAPI spec at `https://public-api.luma.com/openapi.json`.
+
+The `@alhwyn/luma` SDK wraps these same endpoints. Use this reference to explore request shapes, try calls in the playground, and compare responses with SDK methods.
+
+## Authentication
+
+Every request needs the `x-luma-api-key` header. Create a key at [Luma API keys](https://luma.com/calendar/manage/api-keys).
+
+In the playground, enter your key before sending a request.
+
+## Start here
+
+Try these endpoints in the playground (find them in the sidebar under this tab):
+
+| Endpoint | SDK equivalent |
+| --- | --- |
+| `GET /v1/users/get-self` | `luma.users.get()` |
+| `GET /v1/calendars/events/list` | `luma.events.list()` |
+| `POST /v2/webhooks/create` | `luma.webhooks.create()` |
+
+Official docs with examples: [docs.luma.com](https://docs.luma.com/reference/getting-started-with-your-api).
+
+## SDK mapping
+
+| API endpoint | SDK method |
+| --- | --- |
+| `GET /v1/users/get-self` | `luma.users.get()` |
+| `GET /v1/calendars/get` | `luma.calendar.get()` |
+| `GET /v1/calendars/events/list` | `luma.events.list()` |
+| `GET /v1/events/get` | `luma.events.get(id)` |
+| `POST /v1/events/guests/add` | `luma.events.guests.add(id, body)` |
+| `POST /v2/webhooks/create` | `luma.webhooks.create(body)` |
+
+See [Usage](/usage) for SDK guides and [Test your setup](/test-your-setup) to verify your key against the live API.

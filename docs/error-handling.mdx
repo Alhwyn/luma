@@ -1,0 +1,73 @@
+---
+title: Error handling
+description: Catch and handle Luma API errors in the SDK.
+---
+
+Failed API requests throw typed errors from `@alhwyn/luma`. All errors extend `LumaError` and include `status` and optional `body` from the API response.
+
+## Error types
+
+| Class | HTTP status | When |
+| --- | --- | --- |
+| `ValidationError` | 400 | Invalid request parameters or body |
+| `AuthenticationError` | 401 | Missing or invalid API key |
+| `RateLimitError` | 429 | Rate limit exceeded |
+| `WebhookSignatureError` | 401 | Webhook signature verification failed |
+| `LumaError` | other | Any other non-2xx response |
+
+## Example
+
+```ts
+import {
+  Luma,
+  AuthenticationError,
+  RateLimitError,
+  ValidationError,
+} from "@alhwyn/luma";
+
+const luma = new Luma(process.env.LUMA_API_KEY!);
+
+try {
+  await luma.events.get("not-a-real-id");
+} catch (error) {
+  if (error instanceof ValidationError) {
+    console.error("Bad request:", error.message, error.body);
+  } else if (error instanceof AuthenticationError) {
+    console.error("Check LUMA_API_KEY");
+  } else if (error instanceof RateLimitError) {
+    console.error("Rate limited — retry later");
+  } else if (error instanceof Error) {
+    console.error(error.message);
+  }
+}
+```
+
+## Webhook verification errors
+
+Inbound webhook verification throws `WebhookSignatureError` when the signature is missing, expired, or invalid:
+
+```ts
+import { WebhookSignatureError } from "@alhwyn/luma";
+
+try {
+  webhook.verify({ body, headers });
+} catch (error) {
+  if (error instanceof WebhookSignatureError) {
+    return new Response("Unauthorized", { status: 401 });
+  }
+  throw error;
+}
+```
+
+## Inspecting error bodies
+
+The API sometimes returns extra detail in the response body:
+
+```ts
+catch (error) {
+  if (error instanceof ValidationError) {
+    console.log(error.status); // 400
+    console.log(error.body);   // raw API JSON, if present
+  }
+}
+```

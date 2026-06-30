@@ -1,20 +1,66 @@
 ---
 title: CLI
-description: Command-line interface for the Luma SDK.
+description: Command-line interface for testing the Luma API.
 ---
 
-After installing `@alhwyn/luma-cli`:
+The `@alhwyn/luma-cli` package wraps common SDK calls for quick testing against the live API.
+
+## Install
 
 ```bash
 bun add @alhwyn/luma-cli
 ```
 
+## Setup
+
+Set `LUMA_API_KEY` in your environment or in a `.env` file in the current directory:
+
+```bash
+LUMA_API_KEY=your-key-here
+```
+
+Get a key from [Luma API keys](https://luma.com/calendar/manage/api-keys).
+
 ## Commands
+
+### Show the authenticated user
 
 ```bash
 luma users get
+```
+
+Calls `GET /v1/users/get-self` through the SDK. Use this as your first smoke test.
+
+### List events
+
+```bash
 luma events list
+luma events list --limit 5
+```
+
+Lists events on your calendar. Default limit is 20.
+
+### Help
+
+```bash
 luma --help
 ```
 
-The CLI reads `LUMA_API_KEY` from your environment. See [Install](/install) for package setup.
+## Run from the repo
+
+If you cloned the SDK repository:
+
+```bash
+bun run luma users get
+bun run luma events list
+```
+
+## When to use the CLI vs SDK
+
+| Use the CLI when… | Use the SDK when… |
+| --- | --- |
+| You want a quick smoke test | You are building an app or script |
+| You are verifying an API key | You need typed methods and error handling |
+| You are exploring your calendar | You need guests, webhooks, or custom logic |
+
+For a full testing walkthrough, see [Test your setup](/test-your-setup).
