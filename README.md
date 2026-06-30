@@ -54,6 +54,40 @@ await luma.events.guests.add("evt-abc123", {
 });
 ```
 
+## Webhooks
+
+Register a webhook endpoint and verify incoming events with `unwrap()`:
+
+```ts
+// Outbound: create a webhook endpoint
+const endpoint = await luma.webhooks.create({
+  url: "https://myapp.com/api/luma-webhook",
+  event_types: ["guest.updated"],
+});
+// Store endpoint.secret (whsec_...) securely
+
+// Inbound: verify and parse in your HTTP handler
+const event = luma.webhooks.unwrap({
+  body: rawBody,       // raw request body (string), not re-serialized JSON
+  headers: req.headers,
+  secret: process.env.LUMA_WEBHOOK_SECRET!,
+});
+
+if (event.type === "guest.updated") {
+  const justCheckedIn = event.data.event_tickets.some(
+    (ticket) => ticket.checked_in_at !== null,
+  );
+  if (justCheckedIn) {
+    await sendWelcomeEmail({
+      to: event.data.user_email,
+      name: event.data.user_name,
+    });
+  }
+}
+```
+
+Luma does not have a dedicated check-in webhook — check-in fires `guest.updated` with `event_tickets[].checked_in_at` set. See the [Guest Updated webhook docs](https://docs.luma.com/reference/webhook_guest_updated).
+
 ## CLI
 
 After installing `@alhwyn/luma-cli`:

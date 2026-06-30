@@ -19,7 +19,7 @@ export type VerifyWebhookSignatureParams = {
  * @param name - The name of the header to get.
  * @returns The value of the header.
  */
-const getHeader = (
+export const getWebhookHeader = (
   headers: Headers | Record<string, string | string[] | undefined>,
   name: string,
 ): string | undefined => {
@@ -84,7 +84,7 @@ const secureCompareHex = (expected: string, actual: string): boolean => {
 export const verifyWebhookSignature = (params: VerifyWebhookSignatureParams): void => {
   const { secret, tolerance = DEFAULT_TOLERANCE_SECONDS } = params; 
 
-  const signatureHeader = getHeader(params.headers, SIGNATURE_HEADER); 
+  const signatureHeader = getWebhookHeader(params.headers, SIGNATURE_HEADER); 
 
   if (!signatureHeader) throw new WebhookSignatureError("Missing Webhook-Signature header");
 

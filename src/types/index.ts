@@ -50,7 +50,9 @@ export type TicketTypeListEntry = GetResponse<"/v1/events/ticket-types/list">["e
 // API list response shapes (before mapping)
 export type ApiEventListResponse = GetResponse<"/v1/calendars/events/list">; 
 export type ApiGuestListResponse = GetResponse<"/v1/events/guests/list">;  
-export type ApiTicketTypeListResponse = GetResponse<"/v1/events/ticket-types/list">; 
+export type ApiTicketTypeListResponse = GetResponse<"/v1/events/ticket-types/list">;
+export type ApiWebhookListResponse = GetResponse<"/v1/webhooks/list">;
+export type WebhookListEntry = ApiWebhookListResponse["entries"][number]; 
 
 // Request param/body types
 export type GuestListParams = Omit<GetQuery<"/v1/events/guests/list">, "event_id">;
@@ -83,6 +85,17 @@ export type UnwrappedWebhookEvent = WebhookEvent & {
   id: string;
   timestamp: number;
 };
+
+export const WEBHOOK_EVENT_TYPES = new Set<Exclude<WebhookEventType, "*">>([
+  "calendar.event.added",
+  "calendar.person.subscribed",
+  "event.canceled",
+  "event.created",
+  "event.updated",
+  "guest.registered",
+  "guest.updated",
+  "ticket.registered",
+]);
 
 export type { paths, components } from "./generated";
 export type ListResponse<T> = SdkListResponse<T>;
