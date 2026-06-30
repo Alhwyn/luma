@@ -9,7 +9,7 @@
     "url": "git+https://github.com/Alhwyn/luma.git"
   },
   "publishConfig": {
-    "registry": "https://npm.pkg.github.com"
+    "access": "public"
   },
   "keywords": [
     "luma",
@@ -47,7 +47,7 @@
     "build": "bun run build:api && bun run build:cli",
     "test": "bun test",
     "prepublishOnly": "bun run build:api",
-    "publish:github": "npm publish",
+    "publish:npm": "npm publish --access public",
     "generate:types": "openapi-typescript https://public-api.luma.com/openapi.json -o src/types/generated.d.ts"
   },
   "devDependencies": {

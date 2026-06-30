@@ -10,7 +10,7 @@
     "directory": "cli"
   },
   "publishConfig": {
-    "registry": "https://npm.pkg.github.com"
+    "access": "public"
   },
   "bin": {
     "luma": "./dist/index.js"
@@ -25,6 +25,6 @@
   "scripts": {
     "build": "bun build ./src/index.ts --outdir dist --target node --format esm --packages=external && printf '#!/usr/bin/env node\\n' | cat - dist/index.js > dist/index.tmp && mv dist/index.tmp dist/index.js && chmod +x dist/index.js",
     "prepublishOnly": "bun run build",
-    "publish:github": "npm publish"
+    "publish:npm": "npm publish --access public"
   }
 }

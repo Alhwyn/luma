@@ -5,16 +5,9 @@ on:
     types: [published]
   workflow_dispatch:
 
-permissions:
-  contents: read
-  packages: write
-
 jobs:
   publish:
     runs-on: ubuntu-latest
-    env:
-      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
     steps:
       - uses: actions/checkout@v4
 
@@ -25,8 +18,7 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 22
-          registry-url: https://npm.pkg.github.com
-          scope: "@alhwyn"
+          registry-url: https://registry.npmjs.org
 
       - run: bun install --frozen-lockfile
 
@@ -34,17 +26,17 @@ jobs:
 
       - name: Publish @alhwyn/luma
         run: |
-          npm publish || {
+          npm publish --access public || {
             code=$?
             version=$(node -p "require('./package.json').version")
-            if npm view "@alhwyn/luma@${version}" version >/dev/null 2>&1; then
-              echo "@alhwyn/luma@${version} already published"
+            if npm view "@alhwyn/luma@${version}" version --registry https://registry.npmjs.org >/dev/null 2>&1; then
+              echo "@alhwyn/luma@${version} already on npm"
               exit 0
             fi
             exit "$code"
           }
         env:
-          NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
 
       - name: Point CLI at published SDK version
         run: |
@@ -53,7 +45,7 @@ jobs:
         working-directory: cli
 
       - name: Publish @alhwyn/luma-cli
-        run: npm publish
+        run: npm publish --access public
         working-directory: cli
         env:
-          NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
