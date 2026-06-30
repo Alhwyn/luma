@@ -48,9 +48,7 @@ export const parseWebhookEventTypes = (value: string): WebhookScope[] => {
     .map((part) => part.trim())
     .filter(Boolean);
 
-  if (tokens.length === 0) {
-    throw new ValidationError("No webhook event types provided");
-  }
+  if (tokens.length === 0) throw new ValidationError("No webhook event types provided");
 
   const types: WebhookScope[] = [];
   const invalid: string[] = [];
@@ -61,9 +59,7 @@ export const parseWebhookEventTypes = (value: string): WebhookScope[] => {
     else invalid.push(token);
   }
 
-  if (invalid.length > 0) {
-    throw new ValidationError(`Unknown webhook event type(s): ${invalid.join(", ")}`);
-  }
+  if (invalid.length > 0) throw new ValidationError(`Unknown webhook event type(s): ${invalid.join(", ")}`);
 
   return types;
 };
@@ -72,9 +68,8 @@ export const parseWebhookEventTypes = (value: string): WebhookScope[] => {
 export const webhookEventTypesFromEnv = (
   value = process.env.LUMA_WEBHOOK_EVENT_TYPES,
 ): WebhookScope[] => {
-  if (!value?.trim()) {
-    throw new ValidationError("LUMA_WEBHOOK_EVENT_TYPES is not set");
-  }
+  
+  if (!value?.trim()) throw new ValidationError("LUMA_WEBHOOK_EVENT_TYPES is not set");
 
   return parseWebhookEventTypes(value);
 };

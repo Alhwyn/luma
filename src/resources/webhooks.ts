@@ -1,22 +1,16 @@
 import type { Luma } from "../luma";
-import { ValidationError } from "../core/errors";
 import { mapListResponse } from "../core/pagination";
 import {
-  getWebhookHeader,
-  verifyWebhookSignature,
-  type VerifyWebhookSignatureParams,
-} from "../core/webhook-signature";
-import { parseWebhookPayload } from "../webhooks/scopes";
+  WebhookInboundClient,
+  type WebhookInboundClientOptions,
+} from "../webhooks/inbound-client";
 import type {
   ApiWebhookListResponse,
-  UnwrappedWebhookEvent,
   Webhook,
   WebhookCreateParams,
   WebhookListParams,
   WebhookUpdateParams,
 } from "../types";
-
-export type UnwrapWebhookParams = VerifyWebhookSignatureParams;
 
 export class WebhooksResource {
   constructor(private readonly luma: Luma) {}
@@ -53,30 +47,7 @@ export class WebhooksResource {
     );
   }
 
-  unwrap(params: UnwrapWebhookParams): UnwrappedWebhookEvent {
-    verifyWebhookSignature(params);
-
-    const rawBody =
-      typeof params.body === "string"
-        ? params.body
-        : new TextDecoder().decode(params.body);
-
-    const event = parseWebhookPayload(rawBody);
-
-    const id = getWebhookHeader(params.headers, "webhook-id");
-    const timestampHeader = getWebhookHeader(params.headers, "webhook-timestamp");
-
-    if (!id) throw new ValidationError("Missing Webhook-Id header");
-    if (!timestampHeader) throw new ValidationError("Missing Webhook-Timestamp header");
-
-    const timestamp = Number(timestampHeader);
-
-    if (!Number.isFinite(timestamp)) throw new ValidationError("Invalid Webhook-Timestamp header");
-
-    return {
-      ...event,
-      id,
-      timestamp,
-    };
+  client(options: WebhookInboundClientOptions): WebhookInboundClient {
+    return new WebhookInboundClient(options);
   }
 }

@@ -56,7 +56,7 @@ await luma.events.guests.add("evt-abc123", {
 
 ## Webhooks
 
-Register a webhook endpoint and verify incoming events with `unwrap()`:
+Register a webhook endpoint and verify incoming events with `client()`:
 
 ```ts
 import { Luma, WebhookScopes, webhookEventTypesFromEnv } from "@alhwyn/luma";
@@ -76,11 +76,14 @@ const endpoint = await luma.webhooks.create({
 // LUMA_WEBHOOK_EVENT_TYPES=guest.updated,guest.registered
 // or scope names: GuestUpdated,GuestRegistered
 
-// Inbound: verify and parse in your HTTP handler
-const event = luma.webhooks.unwrap({
+// Inbound: bind secret once, verify each request in your HTTP handler
+const webhook = luma.webhooks.client({
+  secret: process.env.LUMA_WEBHOOK_SECRET!,
+});
+
+const event = webhook.verify({
   body: rawBody,       // raw request body (string), not re-serialized JSON
   headers: req.headers,
-  secret: process.env.LUMA_WEBHOOK_SECRET!,
 });
 
 if (event.type === WebhookScopes.GuestUpdated) {
@@ -94,6 +97,16 @@ if (event.type === WebhookScopes.GuestUpdated) {
     });
   }
 }
+```
+
+For inbound-only handlers (no API key), use `WebhookInboundClient` directly:
+
+```ts
+import { WebhookInboundClient, WebhookScopes } from "@alhwyn/luma";
+
+const webhook = new WebhookInboundClient({
+  secret: process.env.LUMA_WEBHOOK_SECRET!,
+});
 ```
 
 Luma does not have a dedicated check-in webhook — check-in fires `guest.updated` with `event_tickets[].checked_in_at` set. See the [Guest Updated webhook docs](https://docs.luma.com/reference/webhook_guest_updated).

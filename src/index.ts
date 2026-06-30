@@ -1,5 +1,10 @@
 export { Luma } from "./luma";
 export * from "./core/errors";
+export { WebhookInboundClient } from "./webhooks/inbound-client";
+export type {
+  VerifyWebhookParams,
+  WebhookInboundClientOptions,
+} from "./webhooks/inbound-client";
 export {
   isWebhookScope,
   parseWebhookEventTypes,
