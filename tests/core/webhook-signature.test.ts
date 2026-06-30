@@ -16,13 +16,13 @@ describe("verifyWebhookSignature", () => {
   const timestamp = Math.floor(Date.now() / 1000);
 
   test("accepts a valid signature", () => {
-    expect(() =>
+    expect(
       verifyWebhookSignature({
         body,
         secret,
         headers: { "Webhook-Signature": sign(body, secret, timestamp) },
       }),
-    ).not.toThrow();
+    ).toEqual({ timestamp });
   });
 
   test("accepts Uint8Array body", () => {
@@ -58,13 +58,24 @@ describe("verifyWebhookSignature", () => {
     ).toThrow(WebhookSignatureError);
   });
 
-  test("rejects an expired timestamp", () => {
+  test("rejects a timestamp outside tolerance", () => {
     const expired = timestamp - 600;
     expect(() =>
       verifyWebhookSignature({
         body,
         secret,
         headers: { "Webhook-Signature": sign(body, secret, expired) },
+      }),
+    ).toThrow(WebhookSignatureError);
+  });
+
+  test("rejects a future timestamp outside tolerance", () => {
+    const future = timestamp + 600;
+    expect(() =>
+      verifyWebhookSignature({
+        body,
+        secret,
+        headers: { "Webhook-Signature": sign(body, secret, future) },
       }),
     ).toThrow(WebhookSignatureError);
   });

@@ -20,7 +20,7 @@ export class WebhookInboundClient {
   constructor(private readonly options: WebhookInboundClientOptions) {}
 
   verify(params: VerifyWebhookParams): UnwrappedWebhookEvent {
-    verifyWebhookSignature({
+    const { timestamp } = verifyWebhookSignature({
       ...params,
       secret: this.options.secret,
       tolerance: this.options.tolerance,
@@ -39,9 +39,15 @@ export class WebhookInboundClient {
     if (!id) throw new ValidationError("Missing Webhook-Id header");
     if (!timestampHeader) throw new ValidationError("Missing Webhook-Timestamp header");
 
-    const timestamp = Number(timestampHeader);
+    const headerTimestamp = Number(timestampHeader);
 
-    if (!Number.isFinite(timestamp)) throw new ValidationError("Invalid Webhook-Timestamp header");
+    if (!Number.isFinite(headerTimestamp)) {
+      throw new ValidationError("Invalid Webhook-Timestamp header");
+    }
+
+    if (headerTimestamp !== timestamp) {
+      throw new ValidationError("Webhook-Timestamp does not match signature");
+    }
 
     return {
       ...event,

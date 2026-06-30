@@ -217,5 +217,21 @@ describe("WebhooksResource", () => {
         }),
       ).toThrow(ValidationError);
     });
+
+    test("rejects a Webhook-Timestamp that does not match the signature", () => {
+      const luma = new Luma("test-key");
+      const inbound = luma.webhooks.client({ secret: webhook.secret });
+
+      expect(() =>
+        inbound.verify({
+          body: guestUpdatedBody,
+          headers: {
+            "Webhook-Signature": sign(guestUpdatedBody, webhook.secret, timestamp),
+            "Webhook-Id": "msg-1",
+            "Webhook-Timestamp": String(timestamp + 1),
+          },
+        }),
+      ).toThrow(ValidationError);
+    });
   });
 });
