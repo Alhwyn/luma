@@ -86,7 +86,7 @@ export type UnwrappedWebhookEvent = WebhookEvent & {
   timestamp: number;
 };
 
-export { WEBHOOK_EVENT_TYPES, WebhookScopes } from "../webhooks/scopes";
+export { SCOPES, WEBHOOK_EVENT_TYPES } from "../webhooks/scopes";
 
 export type { paths, components } from "./generated";
 export type ListResponse<T> = SdkListResponse<T>;

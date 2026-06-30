@@ -1,47 +1,31 @@
 import { ValidationError } from "../core/errors";
 import type { WebhookEvent } from "../types";
 
-/** Named scopes for Luma webhook event types. */
-export const WebhookScopes = {
-  CalendarEventAdded: "calendar.event.added",
-  CalendarPersonSubscribed: "calendar.person.subscribed",
-  EventCanceled: "event.canceled",
-  EventCreated: "event.created",
-  EventUpdated: "event.updated",
-  GuestRegistered: "guest.registered",
-  GuestUpdated: "guest.updated",
-  TicketRegistered: "ticket.registered",
-  All: "*",
-} as const;
+export const SCOPES = [
+  "*",
+  "calendar.event.added",
+  "calendar.person.subscribed",
+  "event.canceled",
+  "event.created",
+  "event.updated",
+  "guest.registered",
+  "guest.updated",
+  "ticket.registered",
+] as const;
 
-export type WebhookScope = (typeof WebhookScopes)[keyof typeof WebhookScopes];
+export type WebhookScope = (typeof SCOPES)[number];
 export type IncomingWebhookScope = Exclude<WebhookScope, "*">;
 
 export const WEBHOOK_EVENT_TYPES = new Set<IncomingWebhookScope>(
-  Object.values(WebhookScopes).filter(
-    (scope): scope is IncomingWebhookScope => scope !== WebhookScopes.All,
-  ),
+  SCOPES.filter((scope): scope is IncomingWebhookScope => scope !== "*"),
 );
 
-const VALID_WEBHOOK_EVENT_TYPES = new Set<string>([
-  ...WEBHOOK_EVENT_TYPES,
-  WebhookScopes.All,
-]);
+const VALID_WEBHOOK_EVENT_TYPES = new Set<string>(SCOPES);
 
 export const isWebhookScope = (type: string): type is IncomingWebhookScope =>
   WEBHOOK_EVENT_TYPES.has(type as IncomingWebhookScope);
 
-const resolveWebhookScopeToken = (token: string): WebhookScope | undefined => {
-  if (token in WebhookScopes) {
-    return WebhookScopes[token as keyof typeof WebhookScopes];
-  }
-
-  if (VALID_WEBHOOK_EVENT_TYPES.has(token)) return token as WebhookScope;
-
-  return undefined;
-};
-
-/** Parse a comma-separated list of webhook scopes (API values or scope names). */
+/** Parse a comma-separated list of webhook scopes (API values). */
 export const parseWebhookEventTypes = (value: string): WebhookScope[] => {
   const tokens = value
     .split(",")
@@ -54,12 +38,13 @@ export const parseWebhookEventTypes = (value: string): WebhookScope[] => {
   const invalid: string[] = [];
 
   for (const token of tokens) {
-    const scope = resolveWebhookScopeToken(token);
-    if (scope) types.push(scope);
+    if (VALID_WEBHOOK_EVENT_TYPES.has(token)) types.push(token as WebhookScope);
     else invalid.push(token);
   }
 
-  if (invalid.length > 0) throw new ValidationError(`Unknown webhook event type(s): ${invalid.join(", ")}`);
+  if (invalid.length > 0) {
+    throw new ValidationError(`Unknown webhook event type(s): ${invalid.join(", ")}`);
+  }
 
   return types;
 };
@@ -68,7 +53,6 @@ export const parseWebhookEventTypes = (value: string): WebhookScope[] => {
 export const webhookEventTypesFromEnv = (
   value = process.env.LUMA_WEBHOOK_EVENT_TYPES,
 ): WebhookScope[] => {
-  
   if (!value?.trim()) throw new ValidationError("LUMA_WEBHOOK_EVENT_TYPES is not set");
 
   return parseWebhookEventTypes(value);

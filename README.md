@@ -22,14 +22,17 @@ bun add @alhwyn/luma
 bun add @alhwyn/luma-cli
 ```
 
+
+
 ## Setup
 
 Get an API key from [Luma API keys](https://luma.com/calendar/manage/api-keys) (Luma Plus required).
 
 ```bash
-cp .env.example .env
 # add LUMA_API_KEY=your-key-here
 ```
+
+
 
 ## Usage
 
@@ -45,62 +48,76 @@ await luma.events.guests.add("evt-abc123", {
 });
 ```
 
+
+
 ## Webhooks
 
-Register a webhook endpoint and verify incoming events with `client()`:
+Add to `.env` (see [.env.example](.env.example)):
+
+```bash
+LUMA_WEBHOOK_SECRET=whsec_...
+LUMA_WEBHOOK_EVENT_TYPES=guest.updated,guest.registered
+```
+
+
+
+### Register an endpoint
 
 ```ts
-import { Luma, WebhookScopes, webhookEventTypesFromEnv } from "@alhwyn/luma";
+import { Luma } from "@alhwyn/luma";
 
 const luma = new Luma(process.env.LUMA_API_KEY!);
 
-// Outbound: create a webhook endpoint
 const endpoint = await luma.webhooks.create({
   url: "https://myapp.com/api/luma-webhook",
-  event_types: webhookEventTypesFromEnv(),
-  // or use named scopes directly:
-  // event_types: [WebhookScopes.GuestUpdated, WebhookScopes.GuestRegistered],
+  event_types: ["guest.updated", "guest.registered"],
 });
-// Store endpoint.secret (whsec_...) securely in LUMA_WEBHOOK_SECRET
 
-// .env example:
-// LUMA_WEBHOOK_EVENT_TYPES=guest.updated,guest.registered
-// or scope names: GuestUpdated,GuestRegistered
+// Save endpoint.secret as LUMA_WEBHOOK_SECRET
+```
 
-// Inbound: bind secret once, verify each request in your HTTP handler
-const webhook = luma.webhooks.client({
+`event_types` also reads from `LUMA_WEBHOOK_EVENT_TYPES` via `webhookEventTypesFromEnv()`.
+
+### Verify incoming events
+
+```ts
+import { Luma } from "@alhwyn/luma";
+
+const webhook = new Luma(process.env.LUMA_API_KEY!).webhooks.client({
   secret: process.env.LUMA_WEBHOOK_SECRET!,
 });
 
+// In your HTTP handler — pass the raw body, not re-serialized JSON
 const event = webhook.verify({
-  body: rawBody,       // raw request body (string), not re-serialized JSON
+  body: await req.text(),
   headers: req.headers,
 });
-
-if (event.type === WebhookScopes.GuestUpdated) {
-  const justCheckedIn = event.data.event_tickets.some(
-    (ticket) => ticket.checked_in_at !== null,
-  );
-  if (justCheckedIn) {
-    await sendWelcomeEmail({
-      to: event.data.user_email,
-      name: event.data.user_name,
-    });
-  }
-}
 ```
 
-For inbound-only handlers (no API key), use `WebhookInboundClient` directly:
+Inbound-only handlers do not need an API key:
 
 ```ts
-import { WebhookInboundClient, WebhookScopes } from "@alhwyn/luma";
+import { WebhookInboundClient } from "@alhwyn/luma";
 
 const webhook = new WebhookInboundClient({
   secret: process.env.LUMA_WEBHOOK_SECRET!,
 });
 ```
 
-Luma does not have a dedicated check-in webhook — check-in fires `guest.updated` with `event_tickets[].checked_in_at` set. See the [Guest Updated webhook docs](https://docs.luma.com/reference/webhook_guest_updated).
+
+
+### Handle an event
+
+```ts
+if (event.type === "guest.updated") {
+  const checkedIn = event.data.event_tickets.some((t) => t.checked_in_at !== null);
+  if (checkedIn) {
+    // e.g. send welcome email to event.data.user_email
+  }
+}
+```
+
+Luma has no dedicated check-in webhook — check-in arrives as `guest.updated` with `event_tickets[].checked_in_at` set. See the [Guest Updated docs](https://docs.luma.com/reference/webhook_guest_updated).
 
 ## CLI
 
@@ -112,24 +129,3 @@ luma events list
 luma --help
 ```
 
-### Local development
-
-From this repo:
-
-```bash
-bun install
-cp .env.example .env   # add your API key
-bun run luma users get
-bun test
-bun run build
-```
-
-## Publish (maintainers)
-
-Packages publish to GitHub Packages as `@alhwyn/luma` and `@alhwyn/luma-cli`.
-
-### Automatic (recommended)
-
-1. Push your changes to `main`
-2. Create a GitHub release with tag `v0.1.0` (or bump version in `package.json` first)
-3. The [Publish workflow](.github/workflows/publish.yml) runs on `release: published` and publishes both packages
