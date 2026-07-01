@@ -27,10 +27,25 @@ jobs:
 
       - run: bun test
 
-      - name: Verify npm token
-        run: npm whoami
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+      - name: Verify npm auth
+        run: |
+          if [ -z "$NODE_AUTH_TOKEN" ]; then
+            echo "::error::NPM_TOKEN secret is not set"
+            exit 1
+          fi
+          case "$NODE_AUTH_TOKEN" in
+            npm_*|ghp_*|gho_*|github_pat_*)
+              if [ "${NODE_AUTH_TOKEN#npm_}" = "$NODE_AUTH_TOKEN" ]; then
+                echo "::error::NPM_TOKEN must be an npm token (npm_...), not a GitHub token"
+                exit 1
+              fi
+              ;;
+            *)
+              echo "::error::NPM_TOKEN must be an npm access token (npm_...)"
+              exit 1
+              ;;
+          esac
+          npm whoami --registry https://registry.npmjs.org
 
       - name: Publish @alhwyn/luma
         run: |
