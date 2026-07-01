@@ -1,14 +1,26 @@
 ---
 title: Install
-description: Install @alhwyn/luma and @alhwyn/luma-cli from npm.
+description: Install @alhwyn/luma and @alhwyn/luma-cli.
 ---
-
-Packages are published on the public [npm registry](https://www.npmjs.com/package/@alhwyn/luma). No GitHub token or `.npmrc` setup is required.
 
 ## SDK
 
+From npm (recommended once published):
+
 ```bash
 bun add @alhwyn/luma
+```
+
+If that returns a 404, install directly from GitHub (no token required):
+
+```bash
+bun add github:Alhwyn/luma
+```
+
+Both resolve to `@alhwyn/luma` in `node_modules` and use the same import path:
+
+```ts
+import { Luma } from "@alhwyn/luma";
 ```
 
 ## CLI (optional)
@@ -16,6 +28,8 @@ bun add @alhwyn/luma
 ```bash
 bun add @alhwyn/luma-cli
 ```
+
+The CLI is published separately on npm. Use the SDK install above if you only need the TypeScript client.
 
 ## Next steps
 

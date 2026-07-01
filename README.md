@@ -10,11 +10,17 @@ A TypeScript client for the [Luma public API](https://public-api.luma.com). Not 
 
 ## Install
 
-Published on the public [npm registry](https://www.npmjs.com/package/@alhwyn/luma). No GitHub token required.
-
 ```bash
 bun add @alhwyn/luma
 ```
+
+If npm returns a 404, install from GitHub instead (no token required):
+
+```bash
+bun add github:Alhwyn/luma
+```
+
+Both install as `@alhwyn/luma` in `node_modules`.
 
 ### CLI (optional)
 

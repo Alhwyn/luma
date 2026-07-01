@@ -5,6 +5,10 @@ on:
     types: [published]
   workflow_dispatch:
 
+permissions:
+  contents: read
+  id-token: write
+
 jobs:
   publish:
     runs-on: ubuntu-latest
@@ -26,7 +30,7 @@ jobs:
 
       - name: Publish @alhwyn/luma
         run: |
-          npm publish --access public || {
+          npm publish --access public --provenance --registry https://registry.npmjs.org || {
             code=$?
             version=$(node -p "require('./package.json').version")
             if npm view "@alhwyn/luma@${version}" version --registry https://registry.npmjs.org >/dev/null 2>&1; then
@@ -45,7 +49,7 @@ jobs:
         working-directory: cli
 
       - name: Publish @alhwyn/luma-cli
-        run: npm publish --access public
+        run: npm publish --access public --provenance --registry https://registry.npmjs.org
         working-directory: cli
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}

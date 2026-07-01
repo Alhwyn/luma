@@ -1,5 +1,0 @@
-# Copy to ~/.npmrc (or project .npmrc) to install @alhwyn packages from GitHub Packages.
-# Create a token at https://github.com/settings/tokens with read:packages scope.
-
-@alhwyn:registry=https://npm.pkg.github.com
-//npm.pkg.github.com/:_authToken=YOUR_GITHUB_TOKEN
