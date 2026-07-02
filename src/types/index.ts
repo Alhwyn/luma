@@ -60,6 +60,7 @@ export type EventCreateParams = PostBody<"/v1/events/create">;
 export type EventUpdateParams = Omit<PostBody<"/v1/events/update">, "event_id">;
 export type CalendarUpdateParams = Omit<PostBody<"/v1/calendars/update">, "calendar_id">;
 export type GuestAddParams = Omit<PostBody<"/v1/events/guests/add">, "event_id">;
+export type GuestSendInvitesParams = Omit<PostBody<"/v1/events/guests/send-invites">, "event_id">;
 export type GuestUpdateStatusParams = Omit<PostBody<"/v1/events/guests/update-status">, "event_id" | "guest_id">;
 export type TicketTypeCreateParams = Omit<PostBody<"/v1/events/ticket-types/create">, "event_id">;
 export type TicketTypeUpdateParams = Omit<PostBody<"/v1/events/ticket-types/update">, "event_id" | "event_ticket_type_id">;

@@ -5,6 +5,7 @@ import type {
   Guest,
   GuestAddParams,
   GuestListParams,
+  GuestSendInvitesParams,
   GuestUpdateStatusParams,
 } from "../../types";
 
@@ -29,6 +30,16 @@ export class EventGuestsResource {
     return this.luma.request<Record<string, never>>("POST", "/v1/events/guests/add", {
       body: { event_id: eventId, ...body },
     });
+  }
+
+  sendInvites(eventId: string, body: GuestSendInvitesParams) {
+    return this.luma.request<Record<string, never>>(
+      "POST",
+      "/v1/events/guests/send-invites",
+      {
+        body: { event_id: eventId, ...body },
+      },
+    );
   }
 
   updateStatus(

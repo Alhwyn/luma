@@ -82,6 +82,33 @@ describe("EventGuestsResource", () => {
     });
   });
 
+  test("sendInvites POSTs to /v1/events/guests/send-invites", async () => {
+    let capturedUrl = "";
+    let capturedBody = "";
+
+    const luma = new Luma("test-key", {
+      fetch: createMockFetch((url, init) => {
+        capturedUrl = url;
+        capturedBody = init?.body as string;
+        return jsonResponse({});
+      }),
+    });
+
+    await luma.events.guests.sendInvites("evt-1", {
+      guests: [{ email: "invite@example.com", name: "Invitee" }],
+      message: "Hope you can make it!",
+    });
+
+    expect(capturedUrl).toBe(
+      "https://public-api.luma.com/v1/events/guests/send-invites",
+    );
+    expect(JSON.parse(capturedBody)).toEqual({
+      event_id: "evt-1",
+      guests: [{ email: "invite@example.com", name: "Invitee" }],
+      message: "Hope you can make it!",
+    });
+  });
+
   test("updateStatus POSTs to /v1/events/guests/update-status", async () => {
     let capturedUrl = "";
     let capturedBody = "";
